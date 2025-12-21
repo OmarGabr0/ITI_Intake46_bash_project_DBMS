@@ -86,7 +86,7 @@ create_table(){
         line="$line":"$element"
     done
     line="${line:1}"
-    echo "$line"
+    echo "$line" > "$1/$2"
 }
 
 
