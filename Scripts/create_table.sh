@@ -80,7 +80,14 @@ PK_file_make(){
 
 }
 
-
+create_table(){
+    for element in "${arr[@]}"
+    do
+        line="$line":"$element"
+    done
+    line="${line:1}"
+    echo "$line"
+}
 
 
 
