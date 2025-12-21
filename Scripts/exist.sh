@@ -1,8 +1,8 @@
 #! /usr/bin/bash
 
 if [[ -f $1/$2 ]]; then
-    echo 1 
+    return 1 
     else
-    echo 0 
+    return 0 
 fi
 
