@@ -7,7 +7,7 @@ shopt -s extglob
     # check if the file is exist
     if (( ret == 0 )) 
     then 
-        mkdir -p "../Databases/$1/$2"
+        mkdir -p "../Databases/$1"
         touch "../Databases/$1/$2"
     else 
         echo "Table already exist" 
@@ -74,6 +74,7 @@ for ((i=0 ; i< no_coln ; i++ )){
 
 }
 
+# Create Metadata
 parse_colns () {
     touch "../Databases/$1/.${2}_meta"
     for coln in "${arr[@]}" 
@@ -117,7 +118,7 @@ parse_colns () {
         echo "$line" >> "../Databases/$1/.${2}_meta"
     done
 }
-
+# create PK file
 PK_file_make(){
 
     # as $1 = the data base name ; employee for examples
@@ -128,16 +129,18 @@ PK_file_make(){
 
 }
 
+# create table and first line in it
 ## this i made to echo the first line in new table which is column names
 ### like : ID:essn:dno:address 
 create_table(){
     for element in "${arr[@]}"
     do
-        line="$line":"$element"
+    coln_name=$(echo "$element" | awk '{print $1}' )
+        line="$line":"$coln_name"
     done
     #to remove first : in the line 
     line="${line:1}"
-    echo "$line" > "$1/$2"
+    echo "$line" > "../Databases/$1/$2"
 }
 
  
