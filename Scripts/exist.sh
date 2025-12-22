@@ -1,6 +1,7 @@
 #! /usr/bin/bash
-
-if [[ -f $1/$2 ]]; then
+# $1 = Data base name 
+# $2 = Table name
+if [[ -f ../Databases/$1/$2 ]]; then
     return 1 
     else
     return 0 
