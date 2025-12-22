@@ -12,7 +12,7 @@ remove_source () {
 
 pk_edit () {
 
-    sed -i "'/${2}/d'" "../Databases/$1/pk_file"
+    sed -i "/${2}/d" "../Databases/$1/pk_file"
 }
 
 
