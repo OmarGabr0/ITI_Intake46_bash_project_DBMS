@@ -139,7 +139,7 @@ create_table(){
         line="$line":"$coln_name"
     done
     #to remove first : in the line 
-    line="${line:1}"
+    line="${line:1}:"
     echo "$line" > "../Databases/$1/$2"
 }
 
