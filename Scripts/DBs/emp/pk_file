@@ -1,0 +1,3 @@
+department:dno:string
+dependant:essn:string
+deartment:mgssn:integer

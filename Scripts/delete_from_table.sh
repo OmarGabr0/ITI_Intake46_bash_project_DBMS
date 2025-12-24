@@ -19,10 +19,10 @@ retrive_coln() {
     coln_number=$(awk -F: -v coln="$coln" '{ if (NR==1) { for( i=1;i<=NF;i++ ){ if( $i == coln ){print i} } } }' "../Databases/$1/$table")
 
 
-        str=""
-        for ((i=0; i < "$coln_number" ;i++))
+        str="^"
+        for ((i=0; i < coln_number -1 ;i++))
         do 
-            str+="*:"
+            str+="[^:]*:"
         done
         str+=$patter":*"
     echo "$str"
