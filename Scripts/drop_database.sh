@@ -1,5 +1,7 @@
 read -p "Enter the name of the database you want to drop : " DB_name
 DB_dir="../Databases/$DB_name"
+sleep_duration=0.5
+
 
 if [ -d $DB_dir  -a  -d "../Databases" ]
 then 
@@ -9,19 +11,19 @@ then
 	then
 		rm -r $DB_dir
 		echo "Database $DB_name dropped successfully" 
-		sleep 1
+		 sleep $sleep_duration
 	elif [ "$response" = "n" -o "$response" = "N" ]
 	then
 		echo "Drop request cancelled"
-		sleep 1
+		sleep $sleep_duration
 	else
 		echo "Wrong input"
 		echo "Drop request cancelled"
-		sleep 1
+		sleep $sleep_duration
 	fi
 
 
 else
 	echo "Database does not exist"
-	sleep 1
+	sleep $sleep_duration
 fi
