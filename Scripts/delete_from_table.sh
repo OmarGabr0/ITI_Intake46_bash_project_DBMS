@@ -9,15 +9,14 @@ take_inputs(){
     # the coln name from the pattern 
     
 
-   operator=$(echo $cond | sed -n 's/.*\(<=\|>=\|<\|>\|=\).*/\1/p')  
-# need to understand more 
-        op_escaped=$(echo "$operator" | sed 's/[][\\.^$*]/\\&/g')
 
-    #coln=${cond%=*}
-        coln=$(echo "$cond" | sed "s/\(.*\)$op_escaped.*/\1/")
+        operator=$(grep -oE '<=|>=|<|>|=' <<<"$cond")
+        coln=${cond%%$operator*}
+        patter=${cond#*$operator}
 
-    #patter=${cond#*=}
-        patter=$(echo "$cond" | sed "s/.*$op_escaped\(.*\)/\1/")
+        echo "coln=$coln"
+        echo "operator=$operator"
+        echo "patter=$patter"
 
     # trem if user entered  spaces before the name 
     patter=$(echo "$patter" | sed 's/^[[:space:]]*//')
@@ -75,8 +74,8 @@ get_coln_type(){
                     
                 echo "strPtr=$strPtr"
                 generate_sed_pattern 
-                
-                echo $str
+                #Debug:
+                        echo $str
                 # sed -i "/$str/d" "../Databases/$1/$table"
                 ;;
             +([0-9]))
@@ -85,8 +84,8 @@ get_coln_type(){
                 echo "strPtr=$patter"
                 echo $strptr
                 generate_sed_pattern 
-                # echo the generated sed  pattern 
-                echo $str
+                #Debug: echo the generated sed  pattern 
+                         echo $str
                 # sed -i "/$str/d" "../Databases/$1/$table"
                 ;;
                 # if no thing else 
@@ -96,17 +95,17 @@ get_coln_type(){
                 ;;  
             esac
         ;;
-        >) 
+        ">") 
             ;;
-        <) 
+        "<") 
             ;; 
-        >=) 
+        ">=") 
             ;;
-        <=) 
+        "<=") 
             ;; 
         *) 
             echo "invalid operator"
-            exit 1 
+         #   exit 1 
             ;;
     
     "s")   
