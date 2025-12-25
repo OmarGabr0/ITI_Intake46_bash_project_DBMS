@@ -107,6 +107,7 @@ get_coln_type(){
             echo "invalid operator"
          #   exit 1 
             ;;
+        esac
     
     "s")   
         ;;
