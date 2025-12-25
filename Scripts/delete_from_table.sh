@@ -46,77 +46,68 @@ get_coln_type(){
     meta="../Databases/$1/.${table}_meta"
    
     # git the type from meta data  
-    type=$(grep -w -F  $coln $meta | awk -F: '{print $4}') 
+    type=$(grep -w -F $coln $meta | awk -F: '{print $4}') 
    
-   case $type in 
-    
-    "i")  
-    case $operator in 
-      # case only = 
-      =) 
-        case $patter in 
-            {+([0-9])..+([0-9])})
-            # if input like {1..12} --then arr = 1 2 3 4 
+    case $type in 
+        "i")  
+            case $operator in 
+                # case only = 
+                "=") 
+                    case $patter in 
+                        {+([0-9])..+([0-9])})
+                            # if input like {1..12} --then arr = 1 2 3 4 
+                            arr=($(eval echo "$patter"))
+                            # for debugging 
+                            echo "arr=${arr[@]}"
+                            
+                            strPtr="\(" 
+                            for ele in "${arr[@]}"
+                            do 
+                                strPtr+=$ele"\|"
+                            done 
 
-                arr=($(eval echo "$patter"))
-                # for debugging 
-                echo "arr=${arr[@]}"
-                
-                strPtr="\(" 
-                for ele in "${arr[@]}"
-                do 
-                    strPtr+=$ele"\|"
-                done 
-
-                strPtr="${strPtr%\|}"
-                strPtr=$strPtr")"
-                    
-                    
-                echo "strPtr=$strPtr"
-                generate_sed_pattern 
-                #Debug:
-                        echo $str
-                # sed -i "/$str/d" "../Databases/$1/$table"
-                ;;
-            +([0-9]))
-                    
-                
-                echo "strPtr=$patter"
-                echo $strptr
-                generate_sed_pattern 
-                #Debug: echo the generated sed  pattern 
-                         echo $str
-                # sed -i "/$str/d" "../Databases/$1/$table"
-                ;;
-                # if no thing else 
-            *) 
-                echo "invalid number"
-                exit 1 
-                ;;  
-            esac
-        ;;
-        ">") 
+                            strPtr="${strPtr%\|}"
+                            strPtr=$strPtr")"
+                            
+                            echo "strPtr=$strPtr"
+                            generate_sed_pattern 
+                            #Debug:
+                            echo $str
+                            # sed -i "/$str/d" "../Databases/$1/$table"
+                            ;;
+                        +([0-9]))
+                            echo "strPtr=$patter"
+                            echo $strptr
+                            generate_sed_pattern 
+                            #Debug: echo the generated sed  pattern 
+                            echo $str
+                            # sed -i "/$str/d" "../Databases/$1/$table"
+                            ;;
+                        # if no thing else 
+                        *) 
+                            echo "invalid number"
+                            exit 1 
+                            ;;  
+                    esac # End of case $patter
+                    ;;
+                ">") 
+                    ;;
+                "<") 
+                    ;; 
+                ">=") 
+                    ;;
+                "<=") 
+                    ;; 
+                *) 
+                    echo "invalid operator"
+                    # exit 1 
+                    ;;
+            esac # End of case $operator
             ;;
-        "<") 
-            ;; 
-        ">=") 
+        "s")   
             ;;
-        "<=") 
-            ;; 
-        *) 
-            echo "invalid operator"
-         #   exit 1 
-            ;;
-        esac
-    
-    "s")   
-        ;;
-
-   esac
-    
-    
+    esac # End of case $type
 }
-
 
 main () {
     take_inputs "$@"
