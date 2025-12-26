@@ -14,14 +14,11 @@ take_inputs(){
         coln=${cond%%$operator*}
         patter=${cond#*$operator}
 
-        echo "coln=$coln"
-        echo "operator=$operator"
-        echo "patter=$patter"
+
 
     # trem if user entered  spaces before the name 
     patter=$(echo "$patter" | sed 's/^[[:space:]]*//')
-    echo "coln=$coln"
-    echo "pattern:$patter"
+
     # retrive coln number
     coln_number=$(awk -F: -v coln="$coln" '{ if (NR==1) { for( i=1;i<=NF;i++ ){ if( $i == coln ){print i} } } }' "../Databases/$1/$table")
 
@@ -36,8 +33,7 @@ generate_sed_pattern() {
             str+="[^:]*:"
         done
         str+=$strPtr":"
-    # for debugging:
-            echo "sed_strting=$str"
+
 }
 
 ####################
@@ -57,8 +53,6 @@ get_coln_type(){
                         {+([0-9])..+([0-9])})
                             # if input like {1..12} --then arr = 1 2 3 4 
                             arr=($(eval echo "$patter"))
-                            # for debugging 
-                            echo "arr=${arr[@]}"
                             
                             strPtr="\(" 
                             for ele in "${arr[@]}"
@@ -71,20 +65,16 @@ get_coln_type(){
                             
                             echo "strPtr=$strPtr"
                             generate_sed_pattern 
-                            #Debug:
-                            echo $str
-                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+
+                            sed -i "/$str/d" "../Databases/$1/$table"
                             ;;
                         +([0-9]))
                             strPtr=$patter
                             echo "strPtr=$patter"
                             echo $strptr
                             generate_sed_pattern 
-                            #Debug: 
-                                echo "generated_sed_pattern=$str"
-                                echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+
+                            sed -i "/$str/d" "../Databases/$1/$table"
                             ;;
                         # if no thing 
                         *) 
@@ -95,17 +85,28 @@ get_coln_type(){
                     ;;
                 ">") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
-                        ((patter+=1))
-                        strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
-                        #Debug: 
-                            echo "strptr=$strPtr"
+                            # Don't do ((patter+=1)) here if you use the logic below, 
+                            # because the logic already uses $((units+1)).
+                            
+                            if [ ${#patter} -eq 1 ]; then
 
-                        generate_sed_pattern
-                
-                        #Debug: 
-                            echo "generated_sed_pattern=$str"
-                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+                                strPtr="\([$((patter+1))-9]\|[0-9]\{2,\}\)"
+                                
+                            elif [ ${#patter} -eq 2 ]; then
+                                tens=${patter:0:1}
+                                units=${patter:1:1}
+                                
+                                strPtr="\($tens[$((units+1))-9]\|[$((tens+1))-9][0-9]\|[0-9]\{3,\}\)"
+                            else 
+                                echo "please enter numbers between 1-99"
+                                # Use return or continue instead of exit 1 to keep the script running
+                                return 
+                            fi
+                            
+                            # Ensure generate_sed_pattern uses $strPtr to build $str
+                            generate_sed_pattern 
+                            
+                            sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
                         fi
@@ -113,15 +114,18 @@ get_coln_type(){
                 "<") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         ((patter-=1))
-                        strPtr="\([0-${patter}]\)"
-                        #Debug: 
-                            echo "strPtr=$strPtr"
+                        
+                        if [ $patter -lt 10 ]; then
+                          strPtr="\([0-$patter]\)"
+                        else
+                            # For multi-digits, you need complex ranges
+                            # Example for <= 12: \([0-9]\|1[0-2]\)
+                            strPtr="\([0-9]\|1[0-$((patter % 10))]\)"
+                        fi
                         generate_sed_pattern
                 
-                        #Debug: 
-                            echo "generated_sed_pattern=$str"
-                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+
+                         sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
                         fi
@@ -129,30 +133,44 @@ get_coln_type(){
                 ">=") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         
-                        strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
-                        #Debug: 
-                            echo "strPtr=$strPtr"
+                            
+                            if [ ${#patter} -eq 1 ]; then
+
+                                strPtr="\([$((patter))-9]\|[0-9]\{2,\}\)"
+                                
+                            elif [ ${#patter} -eq 2 ]; then
+                                tens=${patter:0:1}
+                                units=${patter:1:1}
+                                
+                                strPtr="\($tens[$((units))-9]\|[$((tens+1))-9][0-9]\|[0-9]\{3,\}\)"
+                            else 
+                                echo "please enter numbers between 1-99"
+                                # Use return or continue instead of exit 1 to keep the script running
+                                return 
+                            fi
+                        
                         generate_sed_pattern
                 
-                        #Debug: 
-                            echo "generated_sed_pattern=$str"
-                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+
+                        sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
                         fi
                     ;;
                 "<=") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
-                        strPtr="\([0-${patter}]\)"
-                        #Debug: 
-                            echo "strPtr=$strPtr"
+                        if [ $patter -lt 10 ]; then
+                        strPtr="\([0-$patter]\)"
+                        else
+                            # For multi-digits, you need complex ranges
+                            # Example for <= 12: \([0-9]\|1[0-2]\)
+                            strPtr="\([0-9]\|1[0-$((patter % 10))]\)"
+                        fi
+
                         generate_sed_pattern
                 
-                        #Debug: 
-                            echo "generated_sed_pattern=$str"
-                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+
+                        sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
                         fi
@@ -167,12 +185,11 @@ get_coln_type(){
             case $operator in 
                 "=")
                     strPtr=$patter
-                    #Debug: 
-                        echo "strPtr=$strPtr"
+
                     generate_sed_pattern
                     echo "generated_sed_pattern=$str"
                     echo "sed -En \"/$str/p\" \"../Databases/$1/$table\""
-                    # sed -Ei "/$str/d" "../Databases/$1/$table"
+                    sed -Ei "/$str/d" "../Databases/$1/$table"
                     
                     ##Explainaition 
                             ## here i used sed -E that enable ERE regex

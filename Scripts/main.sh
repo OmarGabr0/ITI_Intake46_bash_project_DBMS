@@ -13,10 +13,10 @@ do
 		1) source ./create_database.sh
 			break
 			;;
-		2) ls ../Databases
+		2) ls ../Databases 
 			break
 			;;
-		3) source ./connect_to_database.sh
+		3) source ./connect_to_database.sh 
 			break
 			;;
 		4) source drop_database.sh
@@ -29,4 +29,7 @@ do
 	esac
 
 	done
+	sleep 0.5
+	echo -e "\n"
+	echo "==========="
 done

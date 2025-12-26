@@ -31,13 +31,15 @@ do
 					break;;
 				2) ls $DB_Path 
 					break;;
-				3) source drop_table.sh
+				3)  
+					read -p "Enter table name : " table_name
+					source drop_table.sh $DB_Name $table_name
 					break;;
 				4) source insert_into_table.sh $DB_Name
 					break;;
-				5) source select_from_table.sh
+				5) source select_from_table.sh $DB_Name
 					break;;
-				6) source delete_from_table.sh
+				6) source delete_from_table.sh $DB_Name
 					break;;
 				7) source update_table.sh
 					break;;
