@@ -20,8 +20,7 @@ take_inputs(){
 
     # trem if user entered  spaces before the name 
     patter=$(echo "$patter" | sed 's/^[[:space:]]*//')
-    echo "coln=$coln"
-    echo "pattern:$patter"
+
     # retrive coln number
     coln_number=$(awk -F: -v coln="$coln" '{ if (NR==1) { for( i=1;i<=NF;i++ ){ if( $i == coln ){print i} } } }' "../Databases/$1/$table")
 
@@ -36,8 +35,7 @@ generate_sed_pattern() {
             str+="[^:]*:"
         done
         str+=$strPtr":"
-    # for debugging:
-            echo "sed_strting=$str"
+
 }
 
 ####################
@@ -57,8 +55,6 @@ get_coln_type(){
                         {+([0-9])..+([0-9])})
                             # if input like {1..12} --then arr = 1 2 3 4 
                             arr=($(eval echo "$patter"))
-                            # for debugging 
-                            echo "arr=${arr[@]}"
                             
                             strPtr="\(" 
                             for ele in "${arr[@]}"
@@ -71,20 +67,16 @@ get_coln_type(){
                             
                             echo "strPtr=$strPtr"
                             generate_sed_pattern 
-                            #Debug:
-                            echo $str
-                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+
+                            sed -i "/$str/d" "../Databases/$1/$table"
                             ;;
                         +([0-9]))
                             strPtr=$patter
                             echo "strPtr=$patter"
                             echo $strptr
                             generate_sed_pattern 
-                            #Debug: 
-                                echo "generated_sed_pattern=$str"
-                                echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+
+                            sed -i "/$str/d" "../Databases/$1/$table"
                             ;;
                         # if no thing 
                         *) 
@@ -97,7 +89,7 @@ get_coln_type(){
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         ((patter+=1))
                         strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
-                        
+
                         generate_sed_pattern
                 
                         sed -i "/$str/d" "../Databases/$1/$table"
