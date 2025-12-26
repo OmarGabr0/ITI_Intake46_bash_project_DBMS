@@ -26,7 +26,7 @@ take_inputs(){
     coln_number=$(awk -F: -v coln="$coln" '{ if (NR==1) { for( i=1;i<=NF;i++ ){ if( $i == coln ){print i} } } }' "../Databases/$1/$table")
 
 
-
+}
 #################Getting the coln number using awk #########
 generate_sed_pattern() {
 
@@ -79,11 +79,11 @@ get_coln_type(){
                             echo "strPtr=$patter"
                             echo $strptr
                             generate_sed_pattern 
-                            #Debug: echo the generated sed  pattern 
-                            echo $str
+                            #Debug: 
+                                echo "generated_sed_pattern=$str"
                             # sed -i "/$str/d" "../Databases/$1/$table"
                             ;;
-                        # if no thing else 
+                        # if no thing 
                         *) 
                             echo "invalid number"
                             exit 1 
@@ -91,12 +91,63 @@ get_coln_type(){
                     esac # End of case $patter
                     ;;
                 ">") 
+                    if [[ $patter =~ ^[0-9]+$ ]]; then 
+                        ((patter+=1))
+                        strptr="${patter}\|\[6-9\]\|\[1-9\]\[0-9\]+"
+                        #Debug: 
+                            echo "strptr=$strptr"
+                        generate_sed_pattern
+                
+                        #Debug: 
+                            echo "generated_sed_pattern=$str"
+                            # sed -i "/$str/d" "../Databases/$1/$table"
+                        else
+                            echo "invalid input pattern"
+                        fi
                     ;;
                 "<") 
+                    if [[ $patter =~ ^[0-9]+$ ]]; then 
+                        ((patter-=1))
+                        strptr="\[0-${patter}\]"
+                        #Debug: 
+                            echo "strptr=$strptr"
+                        generate_sed_pattern
+                
+                        #Debug: 
+                            echo "generated_sed_pattern=$str"
+                            # sed -i "/$str/d" "../Databases/$1/$table"
+                        else
+                            echo "invalid input pattern"
+                        fi
                     ;; 
                 ">=") 
+                    if [[ $patter =~ ^[0-9]+$ ]]; then 
+                        
+                        strptr="${patter}\|\[6-9\]\|\[1-9\]\[0-9\]+"
+                        #Debug: 
+                            echo "strptr=$strptr"
+                        generate_sed_pattern
+                
+                        #Debug: 
+                            echo "generated_sed_pattern=$str"
+                            # sed -i "/$str/d" "../Databases/$1/$table"
+                        else
+                            echo "invalid input pattern"
+                        fi
                     ;;
                 "<=") 
+                    if [[ $patter =~ ^[0-9]+$ ]]; then 
+                        strptr="\[0-${patter}\]"
+                        #Debug: 
+                            echo "strptr=$strptr"
+                        generate_sed_pattern
+                
+                        #Debug: 
+                            echo "generated_sed_pattern=$str"
+                            # sed -i "/$str/d" "../Databases/$1/$table"
+                        else
+                            echo "invalid input pattern"
+                        fi
                     ;; 
                 *) 
                     echo "invalid operator"
@@ -105,7 +156,32 @@ get_coln_type(){
             esac # End of case $operator
             ;;
         "s")   
+            case $operator in 
+                "=")
+                    strptr=$patter
+                    #Debug: 
+                        echo $strptr
+                    generate_sed_pattern
+                    echo "generated_sed_pattern=$str"
+                    # sed -Ei "/$str/d" "../Databases/$1/$table"
+                    
+                    ##Explainaition 
+                            ## here i used sed -E that enable ERE regex
+                            ## check the rules of allowed patterns in sed -E 
+                            ## this is the only patterns allowed 
+                            ## Reminder: should implement a feel-safe to check if user
+                            ## input un allowed pattern 
+                    ;;
+                *) 
+                    echo "invalid operator used" 
+                    ;;
+
+            esac
+            
             ;;
+            *) 
+                ;;
+
     esac # End of case $type
 }
 
