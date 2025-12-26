@@ -1,4 +1,6 @@
 #! /usr/bin/bash
+declare -a buffer
+
 shopt -s extglob
  check_file(){
     source exist.sh "$1" "$2" 
@@ -30,36 +32,19 @@ echo -e " wrong input, please enter integer \n or Enter exit to aprot"
 done  
 # keep tring to enter till the value of pk type is valid
 while true; do    
-read -p "Enter PK type: ( string , integer)" PK_Type 
+read -p "Enter PK type: ( string , integer): " PK_Type 
 if [[ "$PK_Type" == "string" || "$PK_Type" == "S" || "$PK_Type" == "s" || \
       "$PK_Type" == "integer" || "$PK_Type" == "int" || "$PK_Type" == "i" || "$PK_Type" == "I" ]]; then
  break
  else  
- echo "please inter a valid option (sting , s, S ) or (integer , int ,i ,I) "
+ echo "please inter a valid option (sting , s, S ) or (integer , int ,i ,I): "
 fi
 done
 
 ## Wrong implementation i did : #### check the type of enterd value of PK 
 #while true; do
 read -p "Enter PK name: " PK 
- #   case $PK_Type in 
- #       "string"|"s"|"s")
- #           if [[ ! $pk == +([a-zA-Z]) ]]; then
- #           echo "please enter valid input according to selected type:  string"
- #           else 
- #           break 2 
- #           fi
- #           ;;
- #       "integer"|"int"|"i"|"I")        
- #           if [[ ! $pk == +([0-9]) ]]; then
- #           echo "please enter valid input according to selected type:  integer"
- #           else 
- #           break 2 
- #           fi
- #           ;
- #
- #   esac
-#done
+
 # saving the columns names 
 echo "Enter Colns names eith constrains"
 echo "Example: Name unique notnull string"
@@ -76,7 +61,7 @@ for ((i=0 ; i< no_coln ; i++ )){
 
 # Create Metadata
 parse_colns () {
-    touch "../Databases/$1/.${2}_meta"
+    
     for coln in "${arr[@]}" 
     do 
         # initializing an array that will have each coln data
@@ -114,8 +99,13 @@ parse_colns () {
         for element in "${val[@]}"; do
             line="$line:$element"
         done
+        
+        # offsite 1 to remove the first ":"  
         line="${line:1}"
-        echo "$line" >> "../Databases/$1/.${2}_meta"
+        #Debug:
+             echo "$line"
+             buffer+=("$line")
+       # echo "$line" >> "../Databases/$1/.${2}_meta"
     done
 }
 # create PK file
@@ -148,10 +138,18 @@ create_table(){
 main() { 
 check_file "$@"
 read_input 
-PK_file_make "$@"
 create_table "$@"
 parse_colns "$@"
 
+
+# printing if code success 
+    ## making the append in pk file
+    PK_file_make "$@"
+    echo "==> PK File updated successfully."
+    ##creating meta data and writing buffered data in meta data file
+    touch "../Databases/$1/.${2}_meta"
+    printf "%s\n" "${buffer[@]}" > "../Databases/$1/.${2}_meta"
+    echo "==> Meta Data File created successfully."
 }
 
 main "$@"
