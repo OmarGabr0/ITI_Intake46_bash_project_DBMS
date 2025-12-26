@@ -166,11 +166,12 @@ get_coln_type(){
         "s")   
             case $operator in 
                 "=")
-                    strptr=$patter
+                    strPtr=$patter
                     #Debug: 
-                        echo $strptr
+                        echo "strPtr=$strPtr"
                     generate_sed_pattern
                     echo "generated_sed_pattern=$str"
+                    echo "sed -En \"/$str/p\" \"../Databases/$1/$table\""
                     # sed -Ei "/$str/d" "../Databases/$1/$table"
                     
                     ##Explainaition 
