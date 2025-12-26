@@ -14,9 +14,7 @@ take_inputs(){
         coln=${cond%%$operator*}
         patter=${cond#*$operator}
 
-        echo "coln=$coln"
-        echo "operator=$operator"
-        echo "patter=$patter"
+
 
     # trem if user entered  spaces before the name 
     patter=$(echo "$patter" | sed 's/^[[:space:]]*//')
@@ -87,12 +85,28 @@ get_coln_type(){
                     ;;
                 ">") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
-                        ((patter+=1))
-                        strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
+                            # Don't do ((patter+=1)) here if you use the logic below, 
+                            # because the logic already uses $((units+1)).
+                            
+                            if [ ${#patter} -eq 1 ]; then
 
-                        generate_sed_pattern
-                
-                        sed -i "/$str/d" "../Databases/$1/$table"
+                                strPtr="\([$((patter+1))-9]\|[0-9]\{2,\}\)"
+                                
+                            elif [ ${#patter} -eq 2 ]; then
+                                tens=${patter:0:1}
+                                units=${patter:1:1}
+                                
+                                strPtr="\($tens[$((units+1))-9]\|[$((tens+1))-9][0-9]\|[0-9]\{3,\}\)"
+                            else 
+                                echo "please enter numbers between 1-99"
+                                # Use return or continue instead of exit 1 to keep the script running
+                                return 
+                            fi
+                            
+                            # Ensure generate_sed_pattern uses $strPtr to build $str
+                            generate_sed_pattern 
+                            
+                            sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
                         fi
@@ -100,8 +114,14 @@ get_coln_type(){
                 "<") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         ((patter-=1))
-                        strPtr="\([0-${patter}]\)"
-
+                        
+                        if [ $patter -lt 10 ]; then
+                          strPtr="\([0-$patter]\)"
+                        else
+                            # For multi-digits, you need complex ranges
+                            # Example for <= 12: \([0-9]\|1[0-2]\)
+                            strPtr="\([0-9]\|1[0-$((patter % 10))]\)"
+                        fi
                         generate_sed_pattern
                 
 
@@ -113,8 +133,22 @@ get_coln_type(){
                 ">=") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         
-                        strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
+                            
+                            if [ ${#patter} -eq 1 ]; then
 
+                                strPtr="\([$((patter))-9]\|[0-9]\{2,\}\)"
+                                
+                            elif [ ${#patter} -eq 2 ]; then
+                                tens=${patter:0:1}
+                                units=${patter:1:1}
+                                
+                                strPtr="\($tens[$((units))-9]\|[$((tens+1))-9][0-9]\|[0-9]\{3,\}\)"
+                            else 
+                                echo "please enter numbers between 1-99"
+                                # Use return or continue instead of exit 1 to keep the script running
+                                return 
+                            fi
+                        
                         generate_sed_pattern
                 
 
@@ -125,7 +159,13 @@ get_coln_type(){
                     ;;
                 "<=") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
-                        strPtr="\([0-${patter}]\)"
+                        if [ $patter -lt 10 ]; then
+                        strPtr="\([0-$patter]\)"
+                        else
+                            # For multi-digits, you need complex ranges
+                            # Example for <= 12: \([0-9]\|1[0-2]\)
+                            strPtr="\([0-9]\|1[0-$((patter % 10))]\)"
+                        fi
 
                         generate_sed_pattern
                 
