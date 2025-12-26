@@ -17,9 +17,15 @@ insert_all(){
 		res=$?
 		if [ $res -eq 1 ]
 		then i=$i-1
-		fi
 		
+		else
+		#Insert data (no errors)
+		record=""
+		record+="${colArr[i]}:"
+		fi
 	}
+	echo $record >> "$table_path"
+	echo "Data inserted successfully"
 }
 
 constraints_check(){
@@ -59,7 +65,7 @@ constraints_check(){
 	then 
 	echo "The data you entered is not unique"
 	return 1
-	fi
+	fi    
 
 	# Checking if NULL or not
 	if [[ $user_input == NULL && ${meta_array[2]} == 0 ]]
@@ -106,12 +112,13 @@ main(){
 		break
 		fi
 	done
-	
+	DB_name="$1"
 	select choice in "Insert data of all columns" "Insert data of specific columns"
 	do
 	case $REPLY in
 	# $1 => Database name
-	1) insert_all $table_path $1 $table_name
+	1) insert_all $table_path $DB_name $table_name
+	source connect_to_database.sh $DB_name
 	;;
 	
 	2) insert_spec $table_path $1

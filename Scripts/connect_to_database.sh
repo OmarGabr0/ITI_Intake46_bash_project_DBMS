@@ -1,8 +1,16 @@
 #! /usr/bin/bash
 
+if [ $# -eq 0 ]
+then
 read -p "Enter the database name : " DB_Name
-
 DB_Path="../Databases/$DB_Name"
+elif [ $# -eq 1 ]
+then
+DB_Name="$1"
+DB_Path="../Databases/$DB_Name"
+fi
+
+
 
 while true
 do
