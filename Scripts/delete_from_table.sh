@@ -21,7 +21,7 @@ take_inputs(){
     # trem if user entered  spaces before the name 
     patter=$(echo "$patter" | sed 's/^[[:space:]]*//')
     echo "coln=$coln"
-    echo "pattern=$patter"
+    echo "pattern:$patter"
     # retrive coln number
     coln_number=$(awk -F: -v coln="$coln" '{ if (NR==1) { for( i=1;i<=NF;i++ ){ if( $i == coln ){print i} } } }' "../Databases/$1/$table")
 
@@ -73,14 +73,17 @@ get_coln_type(){
                             generate_sed_pattern 
                             #Debug:
                             echo $str
+                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
                             # sed -i "/$str/d" "../Databases/$1/$table"
                             ;;
                         +([0-9]))
+                            strPtr=$patter
                             echo "strPtr=$patter"
                             echo $strptr
                             generate_sed_pattern 
                             #Debug: 
                                 echo "generated_sed_pattern=$str"
+                                echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
                             # sed -i "/$str/d" "../Databases/$1/$table"
                             ;;
                         # if no thing 
@@ -93,13 +96,15 @@ get_coln_type(){
                 ">") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         ((patter+=1))
-                        strptr="${patter}\|\[6-9\]\|\[1-9\]\[0-9\]+"
+                        strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
                         #Debug: 
-                            echo "strptr=$strptr"
+                            echo "strptr=$strPtr"
+
                         generate_sed_pattern
                 
                         #Debug: 
                             echo "generated_sed_pattern=$str"
+                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
                             # sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
@@ -108,13 +113,14 @@ get_coln_type(){
                 "<") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         ((patter-=1))
-                        strptr="\[0-${patter}\]"
+                        strPtr="\([0-${patter}]\)"
                         #Debug: 
-                            echo "strptr=$strptr"
+                            echo "strPtr=$strPtr"
                         generate_sed_pattern
                 
                         #Debug: 
                             echo "generated_sed_pattern=$str"
+                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
                             # sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
@@ -123,13 +129,14 @@ get_coln_type(){
                 ">=") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         
-                        strptr="${patter}\|\[6-9\]\|\[1-9\]\[0-9\]+"
+                        strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
                         #Debug: 
-                            echo "strptr=$strptr"
+                            echo "strPtr=$strPtr"
                         generate_sed_pattern
                 
                         #Debug: 
                             echo "generated_sed_pattern=$str"
+                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
                             # sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
@@ -137,13 +144,14 @@ get_coln_type(){
                     ;;
                 "<=") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
-                        strptr="\[0-${patter}\]"
+                        strPtr="\([0-${patter}]\)"
                         #Debug: 
-                            echo "strptr=$strptr"
+                            echo "strPtr=$strPtr"
                         generate_sed_pattern
                 
                         #Debug: 
                             echo "generated_sed_pattern=$str"
+                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
                             # sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
