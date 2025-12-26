@@ -8,6 +8,7 @@ insert_all(){
 	IFS=: read -r -a header < <(head -1 "$table_path")
 	
 	echo "Enter column values : "
+	record=""
 	for((i=0; i < ${#header[@]}; i++)){
 		# Here we'll get the input from user, and validate each field separately 
 		# (integer or string, isPK, NULL/NOT NULL, UNIQUE or not)
@@ -20,7 +21,6 @@ insert_all(){
 		
 		else
 		#Insert data (no errors)
-		record=""
 		record+="${colArr[i]}:"
 		fi
 	}

@@ -97,15 +97,10 @@ get_coln_type(){
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         ((patter+=1))
                         strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
-                        #Debug: 
-                            echo "strptr=$strPtr"
-
+                        
                         generate_sed_pattern
                 
-                        #Debug: 
-                            echo "generated_sed_pattern=$str"
-                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+                        sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
                         fi
@@ -114,14 +109,11 @@ get_coln_type(){
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         ((patter-=1))
                         strPtr="\([0-${patter}]\)"
-                        #Debug: 
-                            echo "strPtr=$strPtr"
+
                         generate_sed_pattern
                 
-                        #Debug: 
-                            echo "generated_sed_pattern=$str"
-                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+
+                         sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
                         fi
@@ -130,14 +122,11 @@ get_coln_type(){
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         
                         strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
-                        #Debug: 
-                            echo "strPtr=$strPtr"
+
                         generate_sed_pattern
                 
-                        #Debug: 
-                            echo "generated_sed_pattern=$str"
-                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+
+                        sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
                         fi
@@ -145,14 +134,11 @@ get_coln_type(){
                 "<=") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         strPtr="\([0-${patter}]\)"
-                        #Debug: 
-                            echo "strPtr=$strPtr"
+
                         generate_sed_pattern
                 
-                        #Debug: 
-                            echo "generated_sed_pattern=$str"
-                            echo "sed -n \"/$str/p\" \"../Databases/$1/$table\""
-                            # sed -i "/$str/d" "../Databases/$1/$table"
+
+                        sed -i "/$str/d" "../Databases/$1/$table"
                         else
                             echo "invalid input pattern"
                         fi
@@ -167,12 +153,11 @@ get_coln_type(){
             case $operator in 
                 "=")
                     strPtr=$patter
-                    #Debug: 
-                        echo "strPtr=$strPtr"
+
                     generate_sed_pattern
                     echo "generated_sed_pattern=$str"
                     echo "sed -En \"/$str/p\" \"../Databases/$1/$table\""
-                    # sed -Ei "/$str/d" "../Databases/$1/$table"
+                    sed -Ei "/$str/d" "../Databases/$1/$table"
                     
                     ##Explainaition 
                             ## here i used sed -E that enable ERE regex

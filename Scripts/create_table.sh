@@ -32,13 +32,13 @@ echo -e " wrong input, please enter integer \n or Enter exit to aprot"
 done  
 # keep tring to enter till the value of pk type is valid
 while true; do    
-read -p "Enter PK type: ( string , integer): " PK_Type 
-if [[ "$PK_Type" == "string" || "$PK_Type" == "S" || "$PK_Type" == "s" || \
-      "$PK_Type" == "integer" || "$PK_Type" == "int" || "$PK_Type" == "i" || "$PK_Type" == "I" ]]; then
- break
- else  
- echo "please inter a valid option (sting , s, S ) or (integer , int ,i ,I): "
-fi
+    read -p "Enter PK type: ( string , integer): " PK_Type 
+        if [[ "$PK_Type" == "string" || "$PK_Type" == "S" || "$PK_Type" == "s" || \
+            "$PK_Type" == "integer" || "$PK_Type" == "int" || "$PK_Type" == "i" || "$PK_Type" == "I" ]]; then
+        break
+        else  
+            echo "please inter a valid option (sting , s, S ) or (integer , int ,i ,I): "
+        fi
 done
 
 ## Wrong implementation i did : #### check the type of enterd value of PK 
