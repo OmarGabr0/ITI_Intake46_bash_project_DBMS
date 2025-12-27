@@ -1,5 +1,9 @@
 #! /usr/bin/bash
 shopt -s extglob
+# Sources section
+source repeating_functions.sh
+
+
 
 insert_all(){
 	# Extract first line which contains column names, then ask user to insert his values
@@ -13,28 +17,41 @@ insert_all(){
 		# Here we'll get the input from user, and validate each field separately 
 		# (integer or string, isPK, NULL/NOT NULL, UNIQUE or not)
 		read -p "${header[i]} : " colArr[i]
-		# $2 => Database name , $3 => Table name
-		constraints_check ${colArr[i]} ${header[i]} "$2" "$3"
-		res=$?
-		if [ $res -eq 1 ]
-		then i=$i-1
-		
-		else
-		#Insert data (no errors)
-		record+="${colArr[i]}:"
-		fi
+		# Checking if the input from user is empty, if empty => error pops out
+			is_empty "${colArr[i]}"
+			res=$?
+			if [ $res -eq 1 ]
+			then 
+			echo "Please enter a value, empty values are not allowed"
+			(( i-- ))
+			else
+			# $2 => Database name , $3 => Table name
+				constraints_check ${colArr[i]} ${header[i]} "$2" "$3"
+				res=$?
+				if [ $res -eq 1 ]
+				then i=$i-1
+				
+				else
+				#Insert data (no errors)
+				record+="${colArr[i]}:"
+				fi
+			fi
+	
 	}
 	echo $record >> "$table_path"
 	echo "Data inserted successfully"
 }
 
 constraints_check(){
-	# Checking if unique or not 
+
 	# Arguments definition
 	user_input=$1
 	col_name=$2
 	DB_name=$3
 	table_name=$4
+
+	# Checking if unique or not 
+
 	is_unique=0
 	# Get meta data for the column
 	meta_data_line=$(sed -n "/"$col_name"/p" "../Databases/$DB_name/."$table_name"_meta")
@@ -66,11 +83,14 @@ constraints_check(){
 	echo "The data you entered is not unique"
 	return 1
 	fi    
+	
 
 	# Checking if NULL or not
+	is_null=0
 	if [[ $user_input == NULL && ${meta_array[2]} == 0 ]]
 	then 
 	echo "This field doesn't accept NULL"
+	is_null=1
 	return 1
 	fi
 
@@ -93,18 +113,30 @@ constraints_check(){
 	echo "Please enter an integer"
 	return 1
 	fi
+
+	# Check if PK or not, and if PK, it must be NOT NULL and UNIQUE
+
 }
 
 main(){
 
 	while true 
 	do
-		read -p "Enter Table Name : " table_name
-		table_path="../Databases/$1/$table_name"
-		source check_if_exists.sh f $table_path
-		res=$?
-		
-		if [ $res -eq 0 ]
+		while true
+		do
+			read -p "Enter Table Name : " table_name
+			is_empty $table_name
+			if [ $? -eq 0 ]
+			then
+				table_path="../Databases/$1/$table_name"
+				break
+			else
+				echo "System does not accept empty input"
+			fi
+		done
+
+		check_if_exists f $table_path
+		if [ $? -eq 0 ]
 		then
 			echo "Table doesn't exist, enter another name : "
 		else
@@ -116,12 +148,13 @@ main(){
 	select choice in "Insert data of all columns" "Insert data of specific columns"
 	do
 	case $REPLY in
-	# $1 => Database name
 	1) insert_all $table_path $DB_name $table_name
 	source connect_to_database.sh $DB_name
 	;;
 	
-	2) insert_spec $table_path $1
+	2)
+	DB_Name=$1 
+	insert_spec $table_path $DB_Name
 	;;
 	
 	*) echo Invalid option

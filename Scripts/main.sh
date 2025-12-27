@@ -2,8 +2,6 @@
 
 # Main menu for database creation
 
-database_dir="../Databases"
-
 while true
 do
 	select choice in "Create Database" "List Databases" "Connect To Database" "Drop Database" "Exit"
@@ -30,6 +28,5 @@ do
 
 	done
 	sleep 0.5
-	echo -e "\n"
-	echo "==========="
+	echo "============================="
 done
