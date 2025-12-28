@@ -21,14 +21,8 @@ take_inputs(){
         coln=${cond%%$operator*}
         patter=${cond#*$operator}
 
-        echo "coln=$coln"
-        echo "operator=$operator"
-        echo "patter=$patter"
-
     # trem if user entered  spaces before the name 
     patter=$(echo "$patter" | sed 's/^[[:space:]]*//')
-    echo "coln=$coln"
-    echo "pattern:$patter"
     # retrive coln number
     ## used in generating sed pattern 
     coln_number=$(awk -F: -v coln="$coln" '{ if (NR==1) { for( i=1;i<=NF;i++ ){ if( $i == coln ){print i} } } }' "../Databases/$1/$table")
@@ -75,8 +69,10 @@ get_coln_type(){
 }
 
 retrive_using_awk(){
+    
 
-    mapfile -t buffer < <(awk -F: -v col="$coln_number" -v op="$operator" -v val="$patter" -v type="$type" '
+
+    mapfile -t buffer < <(awk -F: -v col="$coln_number" -v op="$operator"   -v val="$patter" -v type="$type" '
     NR>1 {
         if (type=="i") {
             if ((op=="=" && $col==val) ||
@@ -102,18 +98,33 @@ retrive_using_awk(){
 
 retrive_data(){
 
+
+    header=$(head -n 1 "../Databases/$1/$table")
     outdata=$(echo "$outdata" | sed 's/^[[:space:]]*//')
+        ## retrive the whole data into buffer then deel with it 
+        retrive_using_awk "$@"
         if [[ "$outdata" == "*" ]]; then
-            retrive_using_awk "$@"
+            echo "$header"
             printf '%s\n' "${buffer[@]}"
             return
         fi
             IFS=',' read -ra cols <<< "$outdata"
-    get_coln_locations "$@"
-    retrive_using_awk "$@"
 
+    ## to parse the colns needed only 
+
+    get_coln_locations "$@"
+    ## parse and get the headers only needed
+     echo "$header" | awk -F: -v cols="$outColn" '
+        BEGIN { n = split(cols, c, " ") }
+        {
+            for (i=1; i<=n; i++) {
+                printf "%s", $c[i]
+                if (i<n) printf ":"
+            }
+            print ""
+        }'
     # Print selected columns
-    printf '%s\n' "${buffer[@]}" | awk -F: -v cols="${outColn[*]}" '
+    printf '%s\n' "${buffer[@]}" | awk -F: -v cols="$outColn" '
     BEGIN { n = split(cols, c, " ") }
     {
         for (i=1; i<=n; i++) {
