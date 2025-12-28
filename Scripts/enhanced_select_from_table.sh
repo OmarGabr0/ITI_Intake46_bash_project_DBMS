@@ -5,7 +5,7 @@ declare -a buffer
 # $1 = data base name 
 take_inputs(){
     #read colns that want the data to be outputed by 
-    read -p "SELECT" outdata    # may be * or dno,name,ssn 
+    read -p "SELECT: " outdata    # may be * or dno,name,ssn 
                                 #IMP: should handle the case of dno, name  , ssn 
 
     read -p "FROM: " table 
