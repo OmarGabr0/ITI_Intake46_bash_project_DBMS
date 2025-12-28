@@ -1,10 +1,17 @@
 #! /usr/bin/bash
 shopt -s extglob
+declare -a buffer
+
 # $1 = data base name 
 take_inputs(){
-    read -p "DELETE FROM: " table 
+    #read colns that want the data to be outputed by 
+    read -p "SELECT" outdata    # may be * or dno,name,ssn 
+                                #IMP: should handle the case of dno, name  , ssn 
+
+    read -p "FROM: " table 
     # coln=pattern
     read -p "WHERE: " cond
+
     # this remove the shortest path and longest path to retrive 
     # the coln name from the pattern 
     
@@ -14,17 +21,37 @@ take_inputs(){
         coln=${cond%%$operator*}
         patter=${cond#*$operator}
 
-
+        echo "coln=$coln"
+        echo "operator=$operator"
+        echo "patter=$patter"
 
     # trem if user entered  spaces before the name 
     patter=$(echo "$patter" | sed 's/^[[:space:]]*//')
-
+    echo "coln=$coln"
+    echo "pattern:$patter"
     # retrive coln number
+    ## used in generating sed pattern 
     coln_number=$(awk -F: -v coln="$coln" '{ if (NR==1) { for( i=1;i<=NF;i++ ){ if( $i == coln ){print i} } } }' "../Databases/$1/$table")
-
+    
 
 }
+####################################################################################
 #################Getting the coln number using awk #########
+### used if the user want any thing not * 
+        ## example : SELECT dno,ssn,addr 
+get_coln_locations() {
+    outColn=""
+    for colns in "${cols[@]}"; do
+        colns=$(echo "$colns" | xargs) 
+        num=$(awk -F: -v coln="$colns" 'NR==1{for(i=1;i<=NF;i++){if($i==coln) print i}}' "../Databases/$1/$table")
+        if [[ -z "$num" ]]; then
+            echo "Error: column '$colns' not found"; exit 1
+        fi
+        outColn+="$num "
+    done
+    outColn=${outColn% }
+}
+
 generate_sed_pattern() {
 
         str="^"
@@ -36,14 +63,71 @@ generate_sed_pattern() {
 
 }
 
-####################
+####################################################################################
+### function to get the coln type from metadata file ######
+## used for retriving
 get_coln_type(){
 
     meta="../Databases/$1/.${table}_meta"
    
     # git the type from meta data  
     type=$(grep -w -F $coln $meta | awk -F: '{print $4}') 
-   
+}
+
+retrive_using_awk(){
+
+    mapfile -t buffer < <(awk -F: -v col="$coln_number" -v op="$operator" -v val="$patter" -v type="$type" '
+    NR>1 {
+        if (type=="i") {
+            if ((op=="=" && $col==val) ||
+                (op==">" && $col>val) ||
+                (op=="<" && $col<val) ||
+                (op==">=" && $col>=val) ||
+                (op=="<=" && $col<=val)) print
+        } else if (type=="s") {
+            if (op=="=" && $col==val) print
+        }
+    }' "../Databases/$1/$table")
+
+}
+
+####################################################################################
+### function that handels the retriver of only selected items from table 
+### retrivered data are based on SELECT argument 
+#### EX: SELECT * 
+#### EX: SELECT dno,ssn,name
+## always call retrive_* as it saves the whole table in a buffer 
+## then i chose here if i want to display the whole data or selected from SELECT argument 
+## this function cant handle the spaces in SELECT arguments
+
+retrive_data(){
+
+    outdata=$(echo "$outdata" | sed 's/^[[:space:]]*//')
+        if [[ "$outdata" == "*" ]]; then
+            retrive_using_awk "$@"
+            printf '%s\n' "${buffer[@]}"
+            return
+        fi
+            IFS=',' read -ra cols <<< "$outdata"
+    get_coln_locations "$@"
+    retrive_using_awk "$@"
+
+    # Print selected columns
+    printf '%s\n' "${buffer[@]}" | awk -F: -v cols="${outColn[*]}" '
+    BEGIN { n = split(cols, c, " ") }
+    {
+        for (i=1; i<=n; i++) {
+            printf "%s", $c[i]
+            if (i<n) printf ":"
+        }
+        print ""
+    }'
+
+}
+## SELECT * 
+## retrived data are based only on battern --> only one battern: 
+### EX: WHERE dno>5
+retrive_all(){
     case $type in 
         "i")  
             case $operator in 
@@ -53,7 +137,6 @@ get_coln_type(){
                         {+([0-9])..+([0-9])})
                             # if input like {1..12} --then arr = 1 2 3 4 
                             arr=($(eval echo "$patter"))
-                            
                             strPtr="\(" 
                             for ele in "${arr[@]}"
                             do 
@@ -66,7 +149,8 @@ get_coln_type(){
                             echo "strPtr=$strPtr"
                             generate_sed_pattern 
 
-                            sed -i "/$str/d" "../Databases/$1/$table"
+
+                        mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table") 
                             ;;
                         +([0-9]))
                             strPtr=$patter
@@ -74,7 +158,7 @@ get_coln_type(){
                             echo $strptr
                             generate_sed_pattern 
 
-                            sed -i "/$str/d" "../Databases/$1/$table"
+                            mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table")
                             ;;
                         # if no thing 
                         *) 
@@ -85,28 +169,12 @@ get_coln_type(){
                     ;;
                 ">") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
-                            # Don't do ((patter+=1)) here if you use the logic below, 
-                            # because the logic already uses $((units+1)).
-                            
-                            if [ ${#patter} -eq 1 ]; then
-
-                                strPtr="\([$((patter+1))-9]\|[0-9]\{2,\}\)"
-                                
-                            elif [ ${#patter} -eq 2 ]; then
-                                tens=${patter:0:1}
-                                units=${patter:1:1}
-                                
-                                strPtr="\($tens[$((units+1))-9]\|[$((tens+1))-9][0-9]\|[0-9]\{3,\}\)"
-                            else 
-                                echo "please enter numbers between 1-99"
-                                # Use return or continue instead of exit 1 to keep the script running
-                                return 
-                            fi
-                            
-                            # Ensure generate_sed_pattern uses $strPtr to build $str
-                            generate_sed_pattern 
-                            
-                            sed -i "/$str/d" "../Databases/$1/$table"
+                        ((patter+=1))
+                       
+                        strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
+                        generate_sed_pattern
+                        mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table")
+              
                         else
                             echo "invalid input pattern"
                         fi
@@ -114,18 +182,10 @@ get_coln_type(){
                 "<") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         ((patter-=1))
-                        
-                        if [ $patter -lt 10 ]; then
-                          strPtr="\([0-$patter]\)"
-                        else
-                            # For multi-digits, you need complex ranges
-                            # Example for <= 12: \([0-9]\|1[0-2]\)
-                            strPtr="\([0-9]\|1[0-$((patter % 10))]\)"
-                        fi
+                        strPtr="\([0-${patter}]\)"
                         generate_sed_pattern
-                
-
-                         sed -i "/$str/d" "../Databases/$1/$table"
+                        mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table")
+                          
                         else
                             echo "invalid input pattern"
                         fi
@@ -133,44 +193,28 @@ get_coln_type(){
                 ">=") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
                         
-                            
-                            if [ ${#patter} -eq 1 ]; then
+                        strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
 
-                                strPtr="\([$((patter))-9]\|[0-9]\{2,\}\)"
-                                
-                            elif [ ${#patter} -eq 2 ]; then
-                                tens=${patter:0:1}
-                                units=${patter:1:1}
-                                
-                                strPtr="\($tens[$((units))-9]\|[$((tens+1))-9][0-9]\|[0-9]\{3,\}\)"
-                            else 
-                                echo "please enter numbers between 1-99"
-                                # Use return or continue instead of exit 1 to keep the script running
-                                return 
-                            fi
-                        
                         generate_sed_pattern
                 
-
-                        sed -i "/$str/d" "../Databases/$1/$table"
+   
+                        
+                        mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table")
+                        
                         else
                             echo "invalid input pattern"
                         fi
                     ;;
                 "<=") 
                     if [[ $patter =~ ^[0-9]+$ ]]; then 
-                        if [ $patter -lt 10 ]; then
-                        strPtr="\([0-$patter]\)"
-                        else
-                            # For multi-digits, you need complex ranges
-                            # Example for <= 12: \([0-9]\|1[0-2]\)
-                            strPtr="\([0-9]\|1[0-$((patter % 10))]\)"
-                        fi
+                        strPtr="\([0-${patter}]\)"
 
                         generate_sed_pattern
                 
 
-                        sed -i "/$str/d" "../Databases/$1/$table"
+                        
+                        mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table")
+
                         else
                             echo "invalid input pattern"
                         fi
@@ -188,8 +232,8 @@ get_coln_type(){
 
                     generate_sed_pattern
                     echo "generated_sed_pattern=$str"
-                    echo "sed -En \"/$str/p\" \"../Databases/$1/$table\""
-                    sed -Ei "/$str/d" "../Databases/$1/$table"
+                    mapfile -t buffer < <(sed -En "/$str/p" "../Databases/$1/$table")
+               
                     
                     ##Explainaition 
                             ## here i used sed -E that enable ERE regex
@@ -215,7 +259,7 @@ main () {
     take_inputs "$@"
    # retrive_coln "$@"
     get_coln_type "$@"
-
+    retrive_data "$@"
 }
 main "$@"
 
