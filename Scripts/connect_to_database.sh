@@ -1,4 +1,5 @@
 #! /usr/bin/bash
+declare -a buffer
 
 # Sources section
 source repeating_functions.sh
@@ -48,7 +49,7 @@ do
 					break;;
 				4) source insert_into_table.sh $DB_Name
 					break;;
-				5) source select_from_table.sh $DB_Name
+				5) source enhanced_select_from_table.sh $DB_Name
 					break;;
 				6) source delete_from_table.sh $DB_Name
 					break;;

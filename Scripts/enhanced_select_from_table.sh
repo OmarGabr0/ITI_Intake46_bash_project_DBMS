@@ -273,4 +273,3 @@ main () {
     retrive_data "$@"
 }
 main "$@"
-
