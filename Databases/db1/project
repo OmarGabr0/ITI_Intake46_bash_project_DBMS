@@ -1,6 +1,16 @@
-pnum:enmae:ploc:dname:
-13:asdf:sfasf:asd:
-14:dsgf:josdgf:piwer:
-5:asfd:dfsd:trg:
-11:sdgfwe:qwerwet:safryer:
-98:sdfjgb:wetrfiohdsf:sdfw:
+emp_id:ename:department:location:salary
+101:Alice Johnson:Finance:New York:75000
+102:Bob Smith:IT:San Francisco:95000
+103:Carol Davis:HR:Chicago:65000
+104:David Wilson:IT:New York:90000
+105:Eva Brown:Marketing:Los Angeles:72000
+106:Frank Moore:Finance:Chicago:80000
+107:Grace Lee:Marketing:San Francisco:70000
+108:Henry Taylor:IT:Los Angeles:88000
+109:Isabel King:HR:New York:68000
+110:Jack White:Finance:San Francisco:77000
+111:Karen Hall:Marketing:Chicago:71000
+112:Liam Scott:IT:New York:92000
+113:Mia Young:HR:Los Angeles:67000
+114:Noah Adams:Finance:Los Angeles:76000
+115:Olivia Baker:Marketing:New York:73000
