@@ -105,10 +105,9 @@ retrive_data(){
         retrive_using_awk "$@"
         if [[ "$outdata" == "*" ]]; then
             echo "$header"
-            printf '%s\n' "${buffer[@]}"
             return
         fi
-            IFS=',' read -ra cols <<< "$outdata"
+        IFS=',' read -ra cols <<< "$outdata"
 
     ## to parse the colns needed only 
 
@@ -124,152 +123,36 @@ retrive_data(){
             print ""
         }'
     # Print selected columns
-    printf '%s\n' "${buffer[@]}" | awk -F: -v cols="$outColn" '
+    mapfile -t buffer < <(printf '%s\n' "${buffer[@]}" | awk -F: -v cols="$outColn" '
     BEGIN { n = split(cols, c, " ") }
-    {
-        for (i=1; i<=n; i++) {
-            printf "%s", $c[i]
-            if (i<n) printf ":"
-        }
-        print ""
-    }'
+            {
+                for (i=1; i<=n; i++) {
+                    printf "%s", $c[i]
+                    if (i<n) printf ":"
+                }
+                print ""
+            }')
+## adding the header 
+       header=$(echo "$header" | awk -F: -v cols="$outColn" '
+            BEGIN { n = split(cols, c, " ") }
+            {
+                for (i=1; i<=n; i++) {
+                    printf "%s", $c[i]
+                    if (i<n) printf ":"
+                }
+                print ""
+            }')
 
 }
-## SELECT * 
-## retrived data are based only on battern --> only one battern: 
-### EX: WHERE dno>5
-retrive_all(){
-    case $type in 
-        "i")  
-            case $operator in 
-                # case only = 
-                "=") 
-                    case $patter in 
-                        {+([0-9])..+([0-9])})
-                            # if input like {1..12} --then arr = 1 2 3 4 
-                            arr=($(eval echo "$patter"))
-                            strPtr="\(" 
-                            for ele in "${arr[@]}"
-                            do 
-                                strPtr+=$ele"\|"
-                            done 
-
-                            strPtr="${strPtr%\|}"
-                            strPtr=$strPtr")"
-                            
-                            echo "strPtr=$strPtr"
-                            generate_sed_pattern 
-
-
-                        mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table") 
-                            ;;
-                        +([0-9]))
-                            strPtr=$patter
-                            echo "strPtr=$patter"
-                            echo $strptr
-                            generate_sed_pattern 
-
-                            mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table")
-                            ;;
-                        # if no thing 
-                        *) 
-                            echo "invalid number"
-                            exit 1 
-                            ;;  
-                    esac # End of case $patter
-                    ;;
-                ">") 
-                    if [[ $patter =~ ^[0-9]+$ ]]; then 
-                        ((patter+=1))
-                       
-                        strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
-                        generate_sed_pattern
-                        mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table")
-              
-                        else
-                            echo "invalid input pattern"
-                        fi
-                    ;;
-                "<") 
-                    if [[ $patter =~ ^[0-9]+$ ]]; then 
-                        ((patter-=1))
-                        strPtr="\([0-${patter}]\)"
-                        generate_sed_pattern
-                        mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table")
-                          
-                        else
-                            echo "invalid input pattern"
-                        fi
-                    ;; 
-                ">=") 
-                    if [[ $patter =~ ^[0-9]+$ ]]; then 
-                        
-                        strPtr="\(\|[${patter}-9]\|[1-9][0-9]\+\)"
-
-                        generate_sed_pattern
-                
-   
-                        
-                        mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table")
-                        
-                        else
-                            echo "invalid input pattern"
-                        fi
-                    ;;
-                "<=") 
-                    if [[ $patter =~ ^[0-9]+$ ]]; then 
-                        strPtr="\([0-${patter}]\)"
-
-                        generate_sed_pattern
-                
-
-                        
-                        mapfile -t buffer < <(sed -n "/$str/p" "../Databases/$1/$table")
-
-                        else
-                            echo "invalid input pattern"
-                        fi
-                    ;; 
-                *) 
-                    echo "invalid operator"
-                    # exit 1 
-                    ;;
-            esac # End of case $operator
-            ;;
-        "s")   
-            case $operator in 
-                "=")
-                    strPtr=$patter
-
-                    generate_sed_pattern
-                    echo "generated_sed_pattern=$str"
-                    mapfile -t buffer < <(sed -En "/$str/p" "../Databases/$1/$table")
-               
-                    
-                    ##Explainaition 
-                            ## here i used sed -E that enable ERE regex
-                            ## check the rules of allowed patterns in sed -E 
-                            ## this is the only patterns allowed 
-                            ## Reminder: should implement a feel-safe to check if user
-                            ## input un allowed pattern 
-                    ;;
-                *) 
-                    echo "invalid operator used" 
-                    ;;
-
-            esac
-            
-            ;;
-            *) 
-                ;;
-
-    esac # End of case $type
-}
-
 main () {
     take_inputs "$@"
    # retrive_coln "$@"
     get_coln_type "$@"
     retrive_data "$@"
+    clear
+   
+    buffer=( "$header" "${buffer[@]}" )
+    printf '%s\n' "${buffer[@]}" | column -s ':' -t
+    echo -e "\n"
 }
 main "$@"
