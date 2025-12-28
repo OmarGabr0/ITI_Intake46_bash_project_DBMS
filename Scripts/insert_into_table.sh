@@ -25,8 +25,9 @@ insert_all(){
 			echo "Please enter a value, empty values are not allowed"
 			(( i-- ))
 			else
-			# $2 => Database name , $3 => Table name
-				constraints_check ${colArr[i]} ${header[i]} "$2" "$3"
+				DB_Name=$2
+				table_name=$3
+				constraints_check ${colArr[i]} ${header[i]} "$DB_Name" "$table_name"
 				res=$?
 				if [ $res -eq 1 ]
 				then i=$i-1
@@ -40,82 +41,6 @@ insert_all(){
 	}
 	echo $record >> "$table_path"
 	echo "Data inserted successfully"
-}
-
-constraints_check(){
-
-	# Arguments definition
-	user_input=$1
-	col_name=$2
-	DB_name=$3
-	table_name=$4
-
-	# Checking if unique or not 
-
-	is_unique=0
-	# Get meta data for the column
-	meta_data_line=$(sed -n "/"$col_name"/p" "../Databases/$DB_name/."$table_name"_meta")
-	IFS=: read -r -a meta_array <<< "$meta_data_line"
-
-	# Getting the index of the column to compare user input with the remaining data of the table
-	IFS=: read -r -a header < <(head -1 "../Databases/$DB_name/$table_name")
-
-	col_index=0
-	for i in ${!header[@]}
-	do
-	if [[ ${header[i]} == "$col_name" ]]
-	then
-		col_index=$((i+1))
-		break
-	fi
-	done
-
-	isUnique_search_result=$(awk -F: -v value="$user_input" -v col_index=$col_index '{ if(value == $col_index){print "Exists"; exit} }' "../Databases/$DB_name/$table_name")
-	if [ -n "$isUnique_search_result" ] 
-	then
-	is_unique=0
-	else
-	is_unique=1
-	fi
-
-	if [[ $is_unique == 0 && ${meta_array[1]} == 1 ]]
-	then 
-	echo "The data you entered is not unique"
-	return 1
-	fi    
-	
-
-	# Checking if NULL or not
-	is_null=0
-	if [[ $user_input == NULL && ${meta_array[2]} == 0 ]]
-	then 
-	echo "This field doesn't accept NULL"
-	is_null=1
-	return 1
-	fi
-
-	# Checking if string or integer
-
-	case "$user_input" in
-	+([0-9]) ) in_datatype="i"
-	;;
-
-	*) in_datatype="s"
-	;; 
-	esac
-
-	if [[ $in_datatype == "i" && ${meta_array[3]} == "s" ]]
-	then 
-	echo "Please enter a string"
-	return 1
-	elif [[ $in_datatype == "s" && ${meta_array[3]} == "i" ]]
-	then
-	echo "Please enter an integer"
-	return 1
-	fi
-
-	# Check if PK or not, and if PK, it must be NOT NULL and UNIQUE
-
 }
 
 main(){
@@ -145,22 +70,23 @@ main(){
 		fi
 	done
 	DB_name="$1"
-	select choice in "Insert data of all columns" "Insert data of specific columns"
-	do
-	case $REPLY in
-	1) insert_all $table_path $DB_name $table_name
+	# select choice in "Insert data of all columns" "Insert data of specific columns"
+	# do
+	# case $REPLY in
+	# 1) 
+	insert_all $table_path $DB_name $table_name
 	source connect_to_database.sh $DB_name
-	;;
+	# ;;
 	
-	2)
-	DB_Name=$1 
-	insert_spec $table_path $DB_Name
-	;;
+	# 2)
+	# DB_Name=$1 
+	# insert_spec $table_path $DB_Name
+	# ;;
 	
-	*) echo Invalid option
-	;;
-	esac
-	done 
+	# *) echo Invalid option
+	# ;;
+	# esac
+	# done 
 	
 }
 
