@@ -1,23 +1,34 @@
 #! /usr/bin/bash
 
+# Sources section
+source repeating_functions.sh
+
 if [ $# -eq 0 ]
 then
-read -p "Enter the database name : " DB_Name
-DB_Path="../Databases/$DB_Name"
+	while true
+	do
+		read -p "Enter the database name : " DB_Name
+		is_empty $DB_Name
+		if [ $? -eq 0 ]
+			then 
+			DB_Path="../Databases/$DB_Name"
+			break
+		else 
+			echo "System doesn't accept empty inputs"
+		fi 
+	done
+
 elif [ $# -eq 1 ]
 then
-DB_Name="$1"
-DB_Path="../Databases/$DB_Name"
+	DB_Name="$1"
+	DB_Path="../Databases/$DB_Name"
 fi
-
-
 
 while true
 do
-		source check_if_exists.sh d $DB_Path
-		result=$?
-
-		if [ $result -eq 1 ]
+		
+		check_if_exists d $DB_Path
+		if [ $? -eq 1 ]
 		then 
 		# While loop for the select to display the menu after choosing any option
 		while true
@@ -41,7 +52,7 @@ do
 					break;;
 				6) source delete_from_table.sh $DB_Name
 					break;;
-				7) source update_table.sh
+				7) source update_table.sh $DB_Name
 					break;;
 				8) source main.sh
 				;;
@@ -58,8 +69,18 @@ do
 			do 
 				case $REPLY in
 				1) 
-				read -p "Enter a valid name: " DB_Name
-				DB_Path="../Databases/$DB_Name"
+					while true
+					do
+						read -p "Enter a valid name: " DB_Name
+						is_empty $DB_Name
+						if [ $? -eq 0 ]
+						then
+							DB_Path="../Databases/$DB_Name"
+							break
+						else
+							echo "Empty inputs are not allowed" 
+						fi
+					done
 				break
 				;;
 				
