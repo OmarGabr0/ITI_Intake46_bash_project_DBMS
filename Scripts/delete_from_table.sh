@@ -63,15 +63,14 @@ get_coln_type(){
                             strPtr="${strPtr%\|}"
                             strPtr=$strPtr")"
                             
-                            echo "strPtr=$strPtr"
+                            
                             generate_sed_pattern 
 
                             sed -i "/$str/d" "../Databases/$1/$table"
                             ;;
                         +([0-9]))
                             strPtr=$patter
-                            echo "strPtr=$patter"
-                            echo $strptr
+                            
                             generate_sed_pattern 
 
                             sed -i "/$str/d" "../Databases/$1/$table"
@@ -79,7 +78,7 @@ get_coln_type(){
                         # if no thing 
                         *) 
                             echo "invalid number"
-                            exit 1 
+                            return 
                             ;;  
                     esac # End of case $patter
                     ;;
@@ -177,7 +176,7 @@ get_coln_type(){
                     ;; 
                 *) 
                     echo "invalid operator"
-                    # exit 1 
+                    return
                     ;;
             esac # End of case $operator
             ;;
@@ -187,8 +186,7 @@ get_coln_type(){
                     strPtr=$patter
 
                     generate_sed_pattern
-                    echo "generated_sed_pattern=$str"
-                    echo "sed -En \"/$str/p\" \"../Databases/$1/$table\""
+                    
                     sed -Ei "/$str/d" "../Databases/$1/$table"
                     
                     ##Explainaition 
@@ -199,7 +197,8 @@ get_coln_type(){
                             ## input un allowed pattern 
                     ;;
                 *) 
-                    echo "invalid operator used" 
+                    echo "invalid operator used"
+                    return 
                     ;;
 
             esac
