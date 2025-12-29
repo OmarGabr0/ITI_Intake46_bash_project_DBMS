@@ -41,10 +41,10 @@ while true; do
         fi
 done
 ###mapping the pk type again###############################################
-    if  [[ "$PK_Type" == "integer" || "$PK_Type" == "int" || "$PK_Type" == "i" || "$PK_Type" == "I" ]]; then 
-        pk_type_mapped=integer 
+    if [[ "$PK_Type" == "integer" || "$PK_Type" == "int" || "$PK_Type" == "i" || "$PK_Type" == "I" ]]; then
+        pk_type_mapped="integer"
     else
-        pk_type_mapped=string 
+        pk_type_mapped="string"
     fi
 #########################################################################################
 
@@ -57,7 +57,8 @@ echo "Enter Colns names with constrains"
 echo "Example: Name unique notnull string"
 echo "or: dependant notunique null integer "
 
-for ((i=0 ; i< no_coln ; i++ )){
+for ((i=0 ; i< no_coln ; i++ ))
+do
     read arr[i]
 
     ###### To check PK unique and not null ######################
@@ -94,15 +95,15 @@ for ((i=0 ; i< no_coln ; i++ )){
     ################################################################
 
     ############### check if the pk line entered before ########### 
-    if (( i == no_coln-1 )) && (( pk_entered == 0 )); then
-        echo "Error: No primary key entered"
-        echo "Aborting."
-        # removing created trash table 
-        rm "../Databases/$1/$2"
-        exit 1
-    fi
+            if (( i == no_coln-1 )) && (( pk_entered == 0 )); then
+                echo "Error: No primary key entered"
+                echo "Aborting."
+                # removing created trash table 
+                rm "../Databases/$1/$2"
+                exit 1
+            fi
         ##############################################################
-    }
+    done
 
     # remove it or leave it : main is for debugging 
         echo " Columns = ${arr[@]}"
