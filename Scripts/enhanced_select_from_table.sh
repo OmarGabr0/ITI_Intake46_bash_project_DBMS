@@ -46,16 +46,6 @@ get_coln_locations() {
     outColn=${outColn% }
 }
 
-generate_sed_pattern() {
-
-        str="^"
-        for ((i=0; i < coln_number -1 ;i++))
-        do 
-            str+="[^:]*:"
-        done
-        str+=$strPtr":"
-
-}
 
 ####################################################################################
 ### function to get the coln type from metadata file ######
@@ -104,7 +94,7 @@ retrive_data(){
         ## retrive the whole data into buffer then deel with it 
         retrive_using_awk "$@"
         if [[ "$outdata" == "*" ]]; then
-            echo "$header"
+            #echo "$header"
             return
         fi
         IFS=',' read -ra cols <<< "$outdata"
@@ -112,16 +102,7 @@ retrive_data(){
     ## to parse the colns needed only 
 
     get_coln_locations "$@"
-    ## parse and get the headers only needed
-     echo "$header" | awk -F: -v cols="$outColn" '
-        BEGIN { n = split(cols, c, " ") }
-        {
-            for (i=1; i<=n; i++) {
-                printf "%s", $c[i]
-                if (i<n) printf ":"
-            }
-            print ""
-        }'
+  
     # Print selected columns
     mapfile -t buffer < <(printf '%s\n' "${buffer[@]}" | awk -F: -v cols="$outColn" '
     BEGIN { n = split(cols, c, " ") }
@@ -132,7 +113,7 @@ retrive_data(){
                 }
                 print ""
             }')
-## adding the header 
+## adding & parsing the header the header 
        header=$(echo "$header" | awk -F: -v cols="$outColn" '
             BEGIN { n = split(cols, c, " ") }
             {
