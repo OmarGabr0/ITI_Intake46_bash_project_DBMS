@@ -207,22 +207,24 @@ update_by_id(){
         input_cols_indices+=( "$( get_index $coln )" )
      done
      
-    # --- Perform the update using awk ---
+    # Perform the update using awk
     awk -F: -v OFS=: \
     -v pk_i="$PK_Index" \
     -v pk_v="$PK_Val" \
-    -v idxs="$(IFS=,; echo "${input_cols_indices[@]}")" \
-    -v vals="$(IFS=,; echo "${input_vals_arr[@]}")" '
+    -v idxs="$(printf "%s," "${input_cols_indices[@]}")" \
+    -v vals="$(printf "%s," "${input_vals_arr[@]}")" '
     BEGIN{
-        split(idxs, I, ",")   # I = indexes of columns to update
-        split(vals, V, ",")   # V = new values
+        n = split(idxs, I, ",")
+        split(vals, V, ",")
+        # remove trailing empty field
+        if(I[n]=="" || V[n]=="") n--   
     }
-    NR==1 { print; next }      # print header line
-    $(pk_i) == pk_v {        # if PK matches
-    for(i=1;i<=length(I);i++)
-        $I[i] = V[i]   # update fields
+    NR==1 { print; next }      
+    $(pk_i) == pk_v {       
+    for(i=1;i<=n;i++)
+        $I[i] = V[i]   
 }
-{ print }                  # print every line
+{ print }          
 ' "$DB_Path/$table_name" > /tmp/tmp_tbl && mv /tmp/tmp_tbl "$DB_Path/$table_name"
 }
 
