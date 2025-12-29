@@ -65,8 +65,9 @@ do
     is__the_pk_line=$( echo "${arr[i]}" | awk -v PK_name="$PK" '{ if ($1==PK_name) {print $0}  }' )
     if [ -n "$is__the_pk_line" ]; then
         pk_entered=1
+        echo "hint: pk entry just added!"
      IFS=' ' read -r -a cols <<< "${arr[i]}"
-        if [[ "${cols[1]}" != "unique" || "${cols[2]}" != "notnull" ||  "${cols[3]}" != "$PK_Type" ]]; then 
+        if [[ "${cols[1]}" != "unique" || "${cols[2]}" != "notnull" ||  "${cols[3]}" != "$pk_type_mapped" ]]; then 
 
             echo "please make the pk unique and notnull"
             echo "re-enter the pk line"
