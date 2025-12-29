@@ -1,0 +1,86 @@
+read_input(){
+# read -p "Enter Table Name: " table_name 
+# commented as assumed table name alreaady passed
+# if user didnt enter an integer it keeps looping or exit
+while true ; do 
+read -p "Enter no of columns: " no_coln
+if [[  $no_coln == +([0-9]) ]]; then
+        break 
+    elif [[ $no_coln = "exit" ]]; then
+    return 1 
+fi
+echo -e " wrong input, please enter integer \n or Enter exit to aprot"   
+done  
+# keep tring to enter till the value of pk type is valid
+while true; do    
+    read -p "Enter PK type: ( string , integer): " PK_Type 
+        if [[ "$PK_Type" == "string" || "$PK_Type" == "S" || "$PK_Type" == "s" || \
+            "$PK_Type" == "integer" || "$PK_Type" == "int" || "$PK_Type" == "i" || "$PK_Type" == "I" ]]; then
+        break
+        else  
+            echo "please inter a valid option (sting , s, S ) or (integer , int ,i ,I): "
+        fi
+done
+###mapping the pk type again###############################################
+    if  [["$PK_Type" == "integer" || "$PK_Type" == "int" || "$PK_Type" == "i" || "$PK_Type" == "I" ]]; then 
+        pk_type_mapped=integer 
+    else
+        pk_type_mapped=string 
+    fi
+#########################################################################################
+
+## Wrong implementation i did : #### check the type of enterd value of PK 
+#while true; do
+read -p "Enter PK name: " PK 
+
+# saving the columns names 
+echo "Enter Colns names with constrains"
+echo "Example: Name unique notnull string"
+echo "or: dependant notunique null integer "
+
+for ((i=0 ; i< no_coln ; i++ )){
+    read arr[i]
+
+    ###### To check PK unique and not null ######################
+    is__the_pk_line=$( echo "${arr[i]}" | awk -v PK_name="$PK" '{ if ($1==PK_name) {print $0}  }' )
+    if [ -n "$is__the_pk_line" ]; then
+        pk_entered=1
+     IFS=' ' read -r -a cols <<< "${arr[i]}"
+        if [[ "${cols[1]}" != "unique" || "${cols[2]}" != "notnull" ||  "${cols[3]}" != "$PK_Type" ]]; then 
+
+            echo "please make the pk unique and notnull"
+            echo "re-enter the pk line"
+            (( i-- ))
+            
+        fi
+    fi
+    ##############################################################
+
+    ###### to check the inpu of data follow the rules or not ######
+    cols=""
+    IFS=' ' read -r -a cols <<< "${arr[i]}"
+    if [[ ! ( \
+        ( "${cols[1]}" == "unique" || "${cols[1]}" == "notunique" ) && \
+        ( "${cols[2]}" == "notnull" || "${cols[2]}" == "null" ) && \
+        ( "${cols[3]}" == "string"  || "${cols[3]}" == "integer" ) \
+    ) ]]; then
+        echo "Invalid line sytax, Re-enter the line again "
+        (( i-- ))  
+    fi 
+    ##############################################################
+    
+    ############### check if the pk is entered again ###############
+
+
+    ################################################################
+
+    ############### check if the pk line entered before ########### 
+if (( i == no_coln-1 )) && (( pk_entered == 0 )); then
+    echo "Error: No primary key entered"
+    echo "Aborting."
+    # removing created trash table 
+    rm "../Databases/$1/$2"
+    exit 1
+fi
+    ##############################################################
+}
