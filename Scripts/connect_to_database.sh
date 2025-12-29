@@ -39,7 +39,7 @@ do
 				case $REPLY in
 				1)
 				 read -p "Enter table name : " table_name
-				 source create_table.sh $DB_Name $table_name
+				 source create_table_enhanced.sh $DB_Name $table_name
 					break;;
 				2) ls $DB_Path 
 					break;;
