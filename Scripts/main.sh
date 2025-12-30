@@ -4,6 +4,7 @@
 
 while true
 do
+ 	echo "====================================="
 	 PS3="Enter a number : "
 	select choice in "Create Database" "List Databases" "Connect To Database" "Drop Database" "Exit"
 	do
@@ -28,6 +29,5 @@ do
 	esac
 
 	done
-	sleep 0.5
-	echo "============================="
+	
 done
