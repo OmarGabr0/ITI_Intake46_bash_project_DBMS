@@ -4,9 +4,11 @@
 # Sources section
 source repeating_functions.sh
 
+shopt -s extglob
+
 DB_Path="../Databases/$1"
 
-take_inputs(){
+main(){
     
     # First phase : Getting table name and its validation
     table_name=""
@@ -17,9 +19,6 @@ take_inputs(){
 
     # Get the column names (meta data) of the table
     col_names=$(head -1 "$DB_Path/$table_name")
-
-    # For debugging :
-    # echo $col_names
 
     no_cols_validation $col_names
 
@@ -40,20 +39,28 @@ take_inputs(){
             input_vals_validation
         done
 
-    # For debugging
-        # for ((i=0; i < no_cols; i++))
-        #     do 
-        #     echo ${input_cols_arr[$i]}
-        # done
+    PK_Datatype=$(sed -n "/$table_name/p" "$DB_Path/pk_file" | awk -F: '{print $3}')
 
-        #     echo "--------------------" 
+    PS3="Enter a number : "
+    select choice in "Update one row" "Update multiple rows"
+    do 
+        case $REPLY in
+            1) 
+            update_by_id 0 1
+            break
+            ;;
 
-        #  for ((i=0; i < no_cols; i++))
-        #     do 
-        #     echo ${input_vals_arr[$i]}
-        # done
-
-    update_by_id
+            2)
+            if [ $PK_Datatype == "i" ]
+            then
+            update_multiple_rows
+            else 
+                echo "The datatype of this table is string, cannot perform this operation"
+            fi
+            break
+            ;;
+        esac
+    done
 
 }
 
@@ -182,20 +189,25 @@ input_vals_validation(){
 }
 
 update_by_id(){
+    min=$1
+    max=$2
     # Get primary key and its index then ask user for the pk value for the row he searches for
     PK=$(sed -n "/$table_name/p" "$DB_Path/pk_file" | awk -F: '{print $2}')
-    PK_Datatype=$(sed -n "/nti/p" "$DB_Path/pk_file" | awk -F: '{print $3}')
      echo "====================================="
-     while true
-     do
-        read -p "Enter value of the row you are updating ($PK) : " PK_Val
-        # This value needs to be validated => integer or string
-        is_empty $PK_Val
-        if [ $? -eq 1 ]
-        then echo "System does not accept empty input"
-        else break
-        fi
-     done
+
+     if [ $max -eq 1 ]
+     then
+        while true
+        do
+            read -p "Enter value of the row you are updating ($PK) : " PK_Val
+            # This value needs to be validated => integer or string
+            is_empty $PK_Val
+            if [ $? -eq 1 ]
+            then echo "System does not accept empty input"
+            else break
+            fi
+        done
+     fi
 
      # Get PK index & indices of columns to be updated
    
@@ -206,7 +218,27 @@ update_by_id(){
      do
         input_cols_indices+=( "$( get_index $coln )" )
      done
-     
+
+   
+    for (( i=$min; i < $max; i++ ))
+    do
+    if [ $max -ne 1 ]
+    then
+    for (( index=0; index < ${#input_cols_arr[@]}; index++ ))
+    do
+        # Get the meta data of the column, and from it check if the column is unique
+        # If it is unique : exit from the function as unique columns values should never be repeated
+        
+       meta_data=$(sed -n "/${input_cols_arr[index]}/p" "$DB_Path/.${table_name}_meta")
+       IFS=: read -r -a meta_data_arr <<< $meta_data
+       if [[ "${meta_data_arr[1]}" == "1" ]]
+       then 
+            echo "It is not allowed to update multiple values in unique columns"
+            return
+        fi
+    done
+    PK_Val=$i
+    fi
     # Perform the update using awk
     awk -F: -v OFS=: \
     -v pk_i="$PK_Index" \
@@ -226,10 +258,60 @@ update_by_id(){
 }
 { print }          
 ' "$DB_Path/$table_name" > /tmp/tmp_tbl && mv /tmp/tmp_tbl "$DB_Path/$table_name"
+    done
 }
 
-main(){
-    take_inputs
+update_multiple_rows(){
+    while true 
+    do
+    echo "====================================="
+    read -p "Enter min value : " min
+    is_empty $min
+    if [ $? -eq 1 ]
+    then 
+        echo "System doesn't accept empty values"
+    else
+            min_datatype=""
+            if [[ $min =~ ^-?[0-9]+$ ]]
+            then
+                min_datatype="i"
+            else
+                min_datatype="s"
+            fi
+
+            if [[ $min_datatype == "i" ]]
+            then break
+            else 
+                echo "Minimum value has to be integer"
+            fi
+    fi 
+    done
+    
+    while true 
+        do
+        echo "====================================="
+        read -p "Enter max value : " max
+        is_empty $max
+        if [ $? -eq 1 ]
+        then 
+            echo "System doesn't accept empty values"
+        else
+            max_datatype=""
+            if [[ $max =~ ^-?[0-9]+$ ]]
+            then
+                max_datatype="i"
+            else
+                max_datatype="s"
+            fi
+
+            if [[ $max_datatype == "i" ]]
+            then break
+            else 
+                echo "Minimum value has to be integer"
+            fi
+        fi
+    done
+    update_by_id $min $max
 }
 
 main $@

@@ -69,25 +69,12 @@ main(){
 		break
 		fi
 	done
+
 	DB_name="$1"
-	# select choice in "Insert data of all columns" "Insert data of specific columns"
-	# do
-	# case $REPLY in
-	# 1) 
+	
 	insert_all $table_path $DB_name $table_name
 	source connect_to_database.sh $DB_name
-	# ;;
-	
-	# 2)
-	# DB_Name=$1 
-	# insert_spec $table_path $DB_Name
-	# ;;
-	
-	# *) echo Invalid option
-	# ;;
-	# esac
-	# done 
-	
+
 }
 
 main "$@"

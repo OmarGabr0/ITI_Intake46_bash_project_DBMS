@@ -34,12 +34,21 @@ do
 		# While loop for the select to display the menu after choosing any option
 		while true
 		do
+			 PS3="Enter a number : "
 			select choice in "Create Table" "List Tables" "Drop Table" "Insert into Table" "Select from Table" "Delete From Table" "Update Table" "Exit" 
 			do
 				case $REPLY in
 				1)
+				while true
+				do
 				 read -p "Enter table name : " table_name
-				 source create_table_enhanced.sh $DB_Name $table_name
+				 is_empty $table_name
+				 if [ $? -eq 1 ]
+				 then echo "System doesn't accept empty inputs"
+				 else break
+				 fi
+				 done
+				 source create_table.sh $DB_Name $table_name
 					break;;
 				2) ls $DB_Path 
 					break;;
@@ -49,7 +58,8 @@ do
 					break;;
 				4) source insert_into_table.sh $DB_Name
 					break;;
-				5) source select_from_table.sh $DB_Name
+				5) source enhanced_select_from_table.sh $DB_Name
+
 					break;;
 				6) source delete_from_table.sh $DB_Name
 					break;;
