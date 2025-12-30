@@ -2,12 +2,21 @@
 # $1 tha data base name
 # $2 the table name 
 
+source repeating_functions.sh
 
 # remove the table and metadata 
 remove_source () {
 
+    check_if_exists "f" "../Databases/$1/$2"
+    if [ $? -eq 1 ]
+    then  
     rm -f "../Databases/$1/$2" 
     rm -f "../Databases/$1/.${2}_meta"
+    echo "Table dropped successfully"
+    else 
+    echo "Table already doesn't exist"
+    source connect_to_database.sh
+    fi
 }
 
 pk_edit () {

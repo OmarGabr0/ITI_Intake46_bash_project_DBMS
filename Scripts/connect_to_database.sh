@@ -55,7 +55,15 @@ do
 				2) ls $DB_Path 
 					break;;
 				3)  
+					while true
+					do
 					read -p "Enter table name : " table_name
+					is_empty $table_name
+					if [ $? -eq 1 ]
+					then echo "Empty inputs are not allowed"
+					else break
+					fi 
+					done
 					source drop_table.sh $DB_Name $table_name
 					break;;
 				4) source insert_into_table.sh $DB_Name
