@@ -81,10 +81,17 @@ for ((i=0 ; i< no_coln ; i++)); do
 
     # PK check
     if [[ "${cols[0]}" == "$PK" ]]; then
-        pk_entered=1
-        if [[ "${cols[1]}" != "unique" || "${cols[2]}" != "notnull" || "${cols[3]}" != "$pk_type_mapped" ]]; then
-            echo "-------- please make the pk unique and notnull"
+        if (( pk_entered ))
+            then 
+            echo "you entered the pk before"
             flag=1
+        else
+            pk_entered=1
+            if [[ "${cols[1]}" != "unique" || "${cols[2]}" != "notnull" || "${cols[3]}" != "$pk_type_mapped" ]]; then
+                echo "-------- please make the pk unique and notnull"
+                flag=1
+                pk_entered=0
+            fi
         fi
     else
         # General syntax check
