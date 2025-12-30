@@ -15,8 +15,8 @@ tmp_file="../Databases/$1/$2"
         mkdir -p "../Databases/$1"
         touch "../Databases/$1/$2"
     else 
-        echo "Table already exist" 
-        exit 1 
+        echo "Table already exists" 
+        source connect_to_database.sh
     fi
  }
 
