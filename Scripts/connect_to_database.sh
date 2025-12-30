@@ -39,7 +39,15 @@ do
 			do
 				case $REPLY in
 				1)
+				while true
+				do
 				 read -p "Enter table name : " table_name
+				 is_empty $table_name
+				 if [ $? -eq 1 ]
+				 then echo "System doesn't accept empty inputs"
+				 else break
+				 fi
+				 done
 				 source create_table.sh $DB_Name $table_name
 					break;;
 				2) ls $DB_Path 
