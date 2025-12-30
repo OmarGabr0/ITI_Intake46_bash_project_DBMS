@@ -2,7 +2,11 @@
 declare -a buffer
 
 shopt -s extglob
+<<<<<<< HEAD
 source repeating_functions.sh
+=======
+
+>>>>>>> Medhat
 tmp_file="../Databases/$1/$2"
 
  check_file(){
