@@ -2,11 +2,7 @@
 declare -a buffer
 
 shopt -s extglob
-<<<<<<< HEAD
 source repeating_functions.sh
-=======
-
->>>>>>> Medhat
 tmp_file="../Databases/$1/$2"
 
  check_file(){
@@ -64,8 +60,9 @@ do
     is_empty $PK
     if [ $? -eq 1 ]; then 
     echo "system not accept empty input" 
+
     else break
-    
+    fi    
 done 
 
 # saving the columns names 
@@ -75,47 +72,43 @@ echo -e "or: dependant notunique null integer \n"
 
 pk_entered=0
 
-for ((i=0 ; i< no_coln ; i++ ))
-do
-    echo -e "Enter Entry number: " $i 
+for ((i=0 ; i< no_coln ; i++)); do
+    flag=0
+    echo -e "Enter Entry number: $i "
     read arr[i]
 
-    ###### To check PK unique and not null ######################
-    is__the_pk_line=$( echo "${arr[i]}" | awk -v PK_name="$PK" '{ if ($1==PK_name) {print $0}  }' )
-    if [ -n "$is__the_pk_line" ]; then
-        pk_entered=1
-        echo "+++++++ hint: pk entry just added!"
-     IFS=' ' read -r -a cols <<< "${arr[i]}"
-        if [[ "${cols[1]}" != "unique" || "${cols[2]}" != "notnull" ||  "${cols[3]}" != "$pk_type_mapped" ]]; then 
+    IFS=' ' read -r -a cols <<< "${arr[i]}"
 
+    # PK check
+    if [[ "${cols[0]}" == "$PK" ]]; then
+        pk_entered=1
+        if [[ "${cols[1]}" != "unique" || "${cols[2]}" != "notnull" || "${cols[3]}" != "$pk_type_mapped" ]]; then
             echo "-------- please make the pk unique and notnull"
-            echo -e "-------- re-enter the pk line"
-            (( i-- ))
-            continue
+            flag=1
+        fi
+    else
+        # General syntax check
+        if [[ ! ( ( "${cols[1]}" == "unique" || "${cols[1]}" == "notunique" ) &&
+                  ( "${cols[2]}" == "notnull" || "${cols[2]}" == "null" ) &&
+                  ( "${cols[3]}" == "string"  || "${cols[3]}" == "integer" ) ) ]]; then
+            echo "-------- Invalid line syntax, Re-enter the line again"
+            flag=1
         fi
     fi
-    ##############################################################
 
-    ###### to check the inpu of data follow the rules or not ######
-    cols=""
-    IFS=' ' read -r -a cols <<< "${arr[i]}"
-    if [[ ! ( \
-        ( "${cols[1]}" == "unique" || "${cols[1]}" == "notunique" ) && \
-        ( "${cols[2]}" == "notnull" || "${cols[2]}" == "null" ) && \
-        ( "${cols[3]}" == "string"  || "${cols[3]}" == "integer" ) \
-    ) ]]; then
-        echo -e "-------- Invalid line sytax, Re-enter the line again \n"
-        (( i-- ))  
-    fi 
-    ##############################################################
-    
-    ############### check if the pk is entered again ###############
+    # retry if flag set
+    if (( flag )); then
+        (( i-- ))
+        continue
+    fi
+done
 
-
-    ################################################################
-
-    done
-    
+# after loop: check PK
+if (( pk_entered == 0 )); then
+    echo "Error: No primary key entered"
+    rm "$tmp_file"
+    return
+fi
     ############### check if the pk line entered before ########### 
             if (( pk_entered == 0 )); then
                 echo "Error: No primary key entered"
