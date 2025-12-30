@@ -4,6 +4,7 @@
 
 while true
 do
+	 PS3="Enter a number : "
 	select choice in "Create Database" "List Databases" "Connect To Database" "Drop Database" "Exit"
 	do
 
