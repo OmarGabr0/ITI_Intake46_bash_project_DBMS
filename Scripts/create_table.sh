@@ -31,7 +31,7 @@ if [[  $no_coln == +([0-9]) ]]; then
     elif [[ $no_coln = "exit" ]]; then
     return 1 
 fi
-echo -e " wrong input, please enter integer \n or Enter exit to aprot"   
+echo -e " wrong input, please enter integer \n or Enter exit to abort"   
 done  
 # keep tring to enter till the value of pk type is valid
 while true; do    
