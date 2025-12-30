@@ -1,3 +1,6 @@
-employee:ssn:i
-dependant:essn:i
-project:pnum:i
+testTable:pk:i
+test:id:i
+test1_table:id:i
+4:empName:string
+test2:id:integer
+test3:id:i
