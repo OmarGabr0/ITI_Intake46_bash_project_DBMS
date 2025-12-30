@@ -1,7 +1,10 @@
-#! /usr/bin/bash
+ #! /usr/bin/bash
 declare -a buffer
 
 shopt -s extglob
+
+tmp_file="../Databases/$1/$2"
+
  check_file(){
     source exist.sh "$1" "$2" 
     ret=$?
@@ -40,22 +43,72 @@ while true; do
             echo "please inter a valid option (sting , s, S ) or (integer , int ,i ,I): "
         fi
 done
+###mapping the pk type again###############################################
+    if [[ "$PK_Type" == "integer" || "$PK_Type" == "int" || "$PK_Type" == "i" || "$PK_Type" == "I" ]]; then
+        pk_type_mapped="integer"
+    else
+        pk_type_mapped="string"
+    fi
+#########################################################################################
 
 ## Wrong implementation i did : #### check the type of enterd value of PK 
 #while true; do
 read -p "Enter PK name: " PK 
 
 # saving the columns names 
-echo "Enter Colns names eith constrains"
+echo -e "Enter Colns names with constrains \n"
 echo "Example: Name unique notnull string"
-echo "or: dependant notunique null integer "
+echo -e "or: dependant notunique null integer \n"
 
-for ((i=0 ; i< no_coln ; i++ )){
+for ((i=0 ; i< no_coln ; i++ ))
+do
+    echo -e "Enter Entry number: " $i 
     read arr[i]
-}
 
-# remove it or leave it : main is for debugging 
-    echo " Columns = ${arr[@]}"
+    ###### To check PK unique and not null ######################
+    is__the_pk_line=$( echo "${arr[i]}" | awk -v PK_name="$PK" '{ if ($1==PK_name) {print $0}  }' )
+    if [ -n "$is__the_pk_line" ]; then
+        pk_entered=1
+        echo "+++++++ hint: pk entry just added!"
+     IFS=' ' read -r -a cols <<< "${arr[i]}"
+        if [[ "${cols[1]}" != "unique" || "${cols[2]}" != "notnull" ||  "${cols[3]}" != "$pk_type_mapped" ]]; then 
+
+            echo "-------- please make the pk unique and notnull"
+            echo -e "-------- re-enter the pk line"
+            (( i-- ))
+            
+        fi
+    fi
+    ##############################################################
+
+    ###### to check the inpu of data follow the rules or not ######
+    cols=""
+    IFS=' ' read -r -a cols <<< "${arr[i]}"
+    if [[ ! ( \
+        ( "${cols[1]}" == "unique" || "${cols[1]}" == "notunique" ) && \
+        ( "${cols[2]}" == "notnull" || "${cols[2]}" == "null" ) && \
+        ( "${cols[3]}" == "string"  || "${cols[3]}" == "integer" ) \
+    ) ]]; then
+        echo -e "-------- Invalid line sytax, Re-enter the line again \n"
+        (( i-- ))  
+    fi 
+    ##############################################################
+    
+    ############### check if the pk is entered again ###############
+
+
+    ################################################################
+
+    ############### check if the pk line entered before ########### 
+            if (( i == no_coln-1 )) && (( pk_entered == 0 )); then
+                echo "Error: No primary key entered"
+                echo "-------- Aborting."
+                # removing created trash table 
+                rm "$tmp_file"
+                return
+            fi
+        ##############################################################
+    done
 
 }
 
@@ -73,7 +126,7 @@ parse_colns () {
         elif [[ "${val[1]}" == "notunique" ]]; then 
                 val[1]=0
         else 
-            echo "You entered wrong uniqueness constraint for ${val[0]}"
+            echo "-------- You entered wrong uniqueness constraint for ${val[0]}"
             exit 1
         fi
 
@@ -82,7 +135,7 @@ parse_colns () {
         elif [[ "${val[2]}" == "notnull" ]]; then 
                 val[2]=0
         else 
-            echo "You entered wrong nullability constraint for ${val[0]}"
+            echo "-------- You entered wrong nullability constraint for ${val[0]}"
             exit 1
         fi
 
@@ -91,7 +144,7 @@ parse_colns () {
         elif [[ "${val[3]}" == "integer" ]]; then 
                 val[3]="i"
         else 
-            echo "You entered wrong type for ${val[0]}"
+            echo "-------- You entered wrong type for ${val[0]}"
             exit 1
         fi
         ## parse the column and write it in metadata
@@ -102,8 +155,7 @@ parse_colns () {
         
         # offsite 1 to remove the first ":"  
         line="${line:1}"
-        #Debug:
-             echo "$line"
+        
              buffer+=("$line")
        # echo "$line" >> "../Databases/$1/.${2}_meta"
     done
@@ -145,11 +197,11 @@ parse_colns "$@"
 # printing if code success 
     ## making the append in pk file
     PK_file_make "$@"
-    echo "==> PK File updated successfully."
+    echo "=======> PK File updated successfully."
     ##creating meta data and writing buffered data in meta data file
     touch "../Databases/$1/.${2}_meta"
     printf "%s\n" "${buffer[@]}" > "../Databases/$1/.${2}_meta"
-    echo "==> Meta Data File created successfully."
+    echo "=======> Meta Data File created successfully."
 }
 
 main "$@"
