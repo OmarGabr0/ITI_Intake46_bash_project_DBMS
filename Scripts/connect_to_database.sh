@@ -34,6 +34,7 @@ do
 		# While loop for the select to display the menu after choosing any option
 		while true
 		do
+			 PS3="Enter a number : "
 			select choice in "Create Table" "List Tables" "Drop Table" "Insert into Table" "Select from Table" "Delete From Table" "Update Table" "Exit" 
 			do
 				case $REPLY in
