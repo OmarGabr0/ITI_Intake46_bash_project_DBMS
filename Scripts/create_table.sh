@@ -33,7 +33,6 @@ if [[  $no_coln == +([0-9]) ]]; then
 fi
 echo -e " wrong input, please enter integer \n or Enter exit to abort"   
 done  
-# keep tring to enter till the value of pk type is valid
 while true; do    
     read -p "Enter PK type: ( string , integer): " PK_Type 
         if [[ "$PK_Type" == "string" || "$PK_Type" == "S" || "$PK_Type" == "s" || \
@@ -79,13 +78,17 @@ for ((i=0 ; i< no_coln ; i++)); do
 
     IFS=' ' read -r -a cols <<< "${arr[i]}"
 
-    # PK check
+    #===================================
+    # check if pk is entered 
     if [[ "${cols[0]}" == "$PK" ]]; then
+        #Handling if the pk intered correctly before 
         if (( pk_entered ))
             then 
             echo "you entered the pk before"
             flag=1
         else
+        #=============================
+        #check that for first time , the pk should be unique and notnul + checking its type matches the type entered before
             pk_entered=1
             if [[ "${cols[1]}" != "unique" || "${cols[2]}" != "notnull" || "${cols[3]}" != "$pk_type_mapped" ]]; then
                 echo "-------- please make the pk unique and notnull"
@@ -94,7 +97,8 @@ for ((i=0 ; i< no_coln ; i++)); do
             fi
         fi
     else
-        # General syntax check
+    #===============================
+    # check the syntax input for youser
         if [[ ! ( ( "${cols[1]}" == "unique" || "${cols[1]}" == "notunique" ) &&
                   ( "${cols[2]}" == "notnull" || "${cols[2]}" == "null" ) &&
                   ( "${cols[3]}" == "string"  || "${cols[3]}" == "integer" ) ) ]]; then
@@ -103,14 +107,15 @@ for ((i=0 ; i< no_coln ; i++)); do
         fi
     fi
 
-    # retry if flag set
+    
     if (( flag )); then
         (( i-- ))
         continue
     fi
 done
 
-# after loop: check PK
+#=========================
+# check if the pk isn't entered at all 
 if (( pk_entered == 0 )); then
     echo "Error: No primary key entered"
     rm "$tmp_file"
