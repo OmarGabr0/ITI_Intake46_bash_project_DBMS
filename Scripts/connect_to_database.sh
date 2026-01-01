@@ -1,5 +1,6 @@
 #! /usr/bin/bash
 declare -a buffer
+source ui.sh
 
 # Sources section
 source repeating_functions.sh
@@ -28,7 +29,8 @@ fi
 
 while true
 do
-		
+	clear 
+	print_header
 		check_if_exists d $DB_Path
 		if [ $? -eq 1 ]
 		then 

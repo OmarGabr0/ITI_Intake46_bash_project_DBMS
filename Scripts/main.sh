@@ -1,10 +1,17 @@
 #! /usr/bin/bash
 
 # Main menu for database creation
-
+source ui.sh
 while true
-do
- 	echo "====================================="
+do	
+	clear
+	#echo "==========================================================" 
+	#echo "                 Welcome to DBMS                          " 
+	#echo " Made by Omar Gabr & Medhat Osama                         "
+	#echo "=========================================================="
+
+	print_header
+
 	 PS3="Enter a number : "
 	select choice in "Create Database" "List Databases" "Connect To Database" "Drop Database" "Exit"
 	do
