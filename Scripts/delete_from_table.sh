@@ -1,5 +1,6 @@
 #! /usr/bin/bash
 shopt -s extglob
+source repeating_functions.sh
 # $1 = data base name 
 take_inputs(){
     read -p "DELETE FROM: " table 
@@ -126,7 +127,7 @@ get_coln_type(){
 
                          sed -i "/$str/d" "../Databases/$1/$table"
                         else
-                            echo "invalid input pattern"
+                            echo -e "${RED}invalid input pattern ${RESET}"
                         fi
                     ;; 
                 ">=") 
@@ -153,7 +154,7 @@ get_coln_type(){
 
                         sed -i "/$str/d" "../Databases/$1/$table"
                         else
-                            echo "invalid input pattern"
+                            echo -e "${RED}invalid input pattern ${RESET}"
                         fi
                     ;;
                 "<=") 
@@ -171,11 +172,11 @@ get_coln_type(){
 
                         sed -i "/$str/d" "../Databases/$1/$table"
                         else
-                            echo "invalid input pattern"
+                            echo -e "${RED}invalid input pattern ${RESET}"
                         fi
                     ;; 
                 *) 
-                    echo "invalid operator"
+                    echo -e "${RED}invalid operator ${RESET}"
                     return
                     ;;
             esac # End of case $operator
@@ -197,7 +198,7 @@ get_coln_type(){
                             ## input un allowed pattern 
                     ;;
                 *) 
-                    echo "invalid operator used"
+                    echo -e "${RED}invalid operator used ${RESET}"
                     return 
                     ;;
 

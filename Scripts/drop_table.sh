@@ -12,9 +12,9 @@ remove_source () {
     then  
     rm -f "../Databases/$1/$2" 
     rm -f "../Databases/$1/.${2}_meta"
-    echo "Table dropped successfully"
+    echo -e "${GREEN}Table dropped successfully ${RESET}"
     else 
-    echo "Table already doesn't exist"
+    echo -e "${RED}Table already doesn't exist ${RESET}"
     source connect_to_database.sh
     fi
 }

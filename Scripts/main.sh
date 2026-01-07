@@ -1,10 +1,15 @@
 #! /usr/bin/bash
-
+source repeating_functions.sh
 # Main menu for database creation
+
 
 while true
 do
- 	echo "====================================="
+	sleep 0.7
+	clear
+ 	echo -e "${CYAN}=====================================${RESET}"
+	echo -e "${GREEN}            Main Menu                ${RESET}"
+	echo -e "${CYAN}=====================================${RESET}"
 	 PS3="Enter a number : "
 	select choice in "Create Database" "List Databases" "Connect To Database" "Drop Database" "Exit"
 	do

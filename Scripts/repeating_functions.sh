@@ -2,6 +2,16 @@
 shopt -s extglob
 # This script contains the functions that are frequently used in the other scripts
 
+# Colors
+RED="\e[31m"
+GREEN="\e[32m"
+YELLOW="\e[33m"
+BLUE="\e[34m"
+CYAN="\e[36m"
+WHITE="\e[97m"
+BOLD="\e[1m"
+RESET="\e[0m"
+
 # Global variables 
 header=()
 
@@ -76,7 +86,7 @@ constraints_check(){
 
 	if [[ $is_unique == 0 && ${meta_array[1]} == 1 ]]
 	then 
-	echo "The data you entered is not unique"
+	echo -e "${RED}The data you entered is not unique ${RESET}"
 	return 1
 	fi    
 	
@@ -85,7 +95,7 @@ constraints_check(){
 	is_null=0
 	if [[ $user_input == NULL && ${meta_array[2]} == 0 ]]
 	then 
-	echo "This field doesn't accept NULL"
+	echo -e "${RED}This field doesn't accept NULL ${RESET}"
 	is_null=1
 	return 1
 	fi
@@ -102,11 +112,11 @@ constraints_check(){
 
 	if [[ $in_datatype == "i" && ${meta_array[3]} == "s" ]]
 	then 
-	echo "Please enter a string"
+	echo -e "${RED}Please enter a string ${RESET}"
 	return 1
 	elif [[ $in_datatype == "s" && ${meta_array[3]} == "i" ]]
 	then
-	echo "Please enter an integer"
+	echo -e "${RED}Please enter an integer ${RESET}"
 	return 1
 	fi
 }

@@ -39,7 +39,7 @@ get_coln_locations() {
         colns=$(echo "$colns" | xargs) 
         num=$(awk -F: -v coln="$colns" 'NR==1{for(i=1;i<=NF;i++){if($i==coln) print i}}' "../Databases/$1/$table")
         if [[ -z "$num" ]]; then
-            echo "Error: column '$colns' not found"; exit 1
+            echo -e "${RED}Error: column '$colns' not found ${RESET}"; exit 1
         fi
         outColn+="$num "
     done
@@ -113,7 +113,7 @@ retrive_data(){
                 }
                 print ""
             }')
-## adding & parsing the header the header 
+## adding & parsing the header
        header=$(echo "$header" | awk -F: -v cols="$outColn" '
             BEGIN { n = split(cols, c, " ") }
             {
@@ -135,5 +135,7 @@ main () {
     buffer=( "$header" "${buffer[@]}" )
     printf '%s\n' "${buffer[@]}" | column -s ':' -t
     echo -e "\n"
+    echo -e "${RED} Press ENTER to continue...${RESET}"
+    read
 }
 main "$@"

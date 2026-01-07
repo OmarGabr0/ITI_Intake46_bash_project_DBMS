@@ -8,10 +8,10 @@ do
 	res=$?
 	if [ $res -eq 1 ]
 	then
-		echo "Input should not be empty"
+		echo -e "${RED}Input should not be empty ${RESET}"
 	elif [[ ! $DB_name =~ ^[A-Za-z][A-Za-z0-9_-]*$ ]]
 	then
-		echo "Invalid input"
+		echo -e "${RED}Invalid input ${RESET}"
 	else 
 		DB_dir="../Databases/$DB_name"
 	break
@@ -25,16 +25,16 @@ then
 	if [ "$response" = "y" -o "$response" = "Y" ] 
 	then
 		rm -r $DB_dir
-		echo "Database $DB_name dropped successfully" 
+		echo -e "${GREEN}Database $DB_name dropped successfully ${RESET}" 
 	elif [ "$response" = "n" -o "$response" = "N" ]
 	then
 		echo "Drop request cancelled"
 	else
-		echo "Wrong input"
+		echo -e "${RED}Wrong input ${RESET}"
 		echo "Drop request cancelled"
 	fi
 
 
 else
-	echo "Database does not exist"
+	echo -e "${RED}Database does not exist ${RESET}"
 fi
