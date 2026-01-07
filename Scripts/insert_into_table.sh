@@ -22,7 +22,7 @@ insert_all(){
 			res=$?
 			if [ $res -eq 1 ]
 			then 
-			echo "Please enter a value, empty values are not allowed"
+			echo -e "${RED}Please enter a value, empty values are not allowed ${RESET}"
 			(( i-- ))
 			else
 				DB_Name=$2
@@ -40,7 +40,7 @@ insert_all(){
 	
 	}
 	echo $record >> "$table_path"
-	echo "Data inserted successfully"
+	echo -e "${GREEN}Data inserted successfully ${RESET}"
 }
 
 main(){
@@ -56,14 +56,14 @@ main(){
 				table_path="../Databases/$1/$table_name"
 				break
 			else
-				echo "System does not accept empty input"
+				echo -e "${RED}System does not accept empty input ${RESET}"
 			fi
 		done
 
 		check_if_exists f $table_path
 		if [ $? -eq 0 ]
 		then
-			echo "Table doesn't exist, enter another name : "
+			echo -e "${RED}Table doesn't exist, enter another name : ${RESET}"
 		else
 		# Table exists, break from the loop
 		break

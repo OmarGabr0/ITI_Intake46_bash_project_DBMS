@@ -15,7 +15,7 @@ tmp_file="../Databases/$1/$2"
         mkdir -p "../Databases/$1"
         touch "../Databases/$1/$2"
     else 
-        echo "Table already exists" 
+        echo -e "${RED}Table already exists ${RESET}" 
         source connect_to_database.sh
     fi
  }
@@ -31,7 +31,7 @@ if [[  $no_coln == +([0-9]) ]]; then
     elif [[ $no_coln = "exit" ]]; then
     return 1 
 fi
-echo -e " wrong input, please enter integer \n or Enter exit to abort"   
+echo -e "${RED}wrong input, please enter integer \n or Enter exit to abort${RESET}"   
 done  
 while true; do    
     read -p "Enter PK type: ( string , integer): " PK_Type 
@@ -39,7 +39,7 @@ while true; do
             "$PK_Type" == "integer" || "$PK_Type" == "int" || "$PK_Type" == "i" || "$PK_Type" == "I" ]]; then
         break
         else  
-            echo "please inter a valid option (sting , s, S ) or (integer , int ,i ,I): "
+            echo -e "${RED}please inter a valid option (sting , s, S ) or (integer , int ,i ,I): ${RESET}"
         fi
 done
 ###mapping the pk type again###############################################
@@ -58,16 +58,16 @@ do
     read -p "Enter PK name: " PK 
     is_empty $PK
     if [ $? -eq 1 ]; then 
-    echo "system not accept empty input" 
-
+    echo -e "${RED}system not accept empty input${RESET}" 
+ 
     else break
     fi    
 done 
 
 # saving the columns names 
-echo -e "Enter Colns names with constrains \n"
-echo "Example: Name unique notnull string"
-echo -e "or: dependant notunique null integer \n"
+echo -e "${CYAN}Enter Colns names with constrains ${RESET} \n"
+echo -e "${CYAN}Example: Name unique notnull string${RESET}"
+echo -e "${CYAN}or: dependant notunique null integer${RESET} \n"
 
 pk_entered=0
 
@@ -84,14 +84,14 @@ for ((i=0 ; i< no_coln ; i++)); do
         #Handling if the pk intered correctly before 
         if (( pk_entered ))
             then 
-            echo "you entered the pk before"
+            echo -e "${RED}you entered the pk before ${RESET}"
             flag=1
         else
         #=============================
         #check that for first time , the pk should be unique and notnul + checking its type matches the type entered before
             pk_entered=1
             if [[ "${cols[1]}" != "unique" || "${cols[2]}" != "notnull" || "${cols[3]}" != "$pk_type_mapped" ]]; then
-                echo "-------- please make the pk unique and notnull"
+                echo -e "${RED}-------- please make the pk unique and notnull ${RESET}"
                 flag=1
                 pk_entered=0
             fi
@@ -102,7 +102,7 @@ for ((i=0 ; i< no_coln ; i++)); do
         if [[ ! ( ( "${cols[1]}" == "unique" || "${cols[1]}" == "notunique" ) &&
                   ( "${cols[2]}" == "notnull" || "${cols[2]}" == "null" ) &&
                   ( "${cols[3]}" == "string"  || "${cols[3]}" == "integer" ) ) ]]; then
-            echo "-------- Invalid line syntax, Re-enter the line again"
+            echo -e "${RED}-------- Invalid line syntax, Re-enter the line again ${RESET}"
             flag=1
         fi
     fi
@@ -117,13 +117,13 @@ done
 #=========================
 # check if the pk isn't entered at all 
 if (( pk_entered == 0 )); then
-    echo "Error: No primary key entered"
+    echo -e "${RED}Error: No primary key entered ${RESET}"
     rm "$tmp_file"
     return
 fi
     ############### check if the pk line entered before ########### 
             if (( pk_entered == 0 )); then
-                echo "Error: No primary key entered"
+                echo -e "${RED}Error: No primary key entered ${RESET}"
                 echo "-------- Aborting."
                 # removing created trash table 
                 rm "$tmp_file"
@@ -147,7 +147,7 @@ parse_colns () {
         elif [[ "${val[1]}" == "notunique" ]]; then 
                 val[1]=0
         else 
-            echo "-------- You entered wrong uniqueness constraint for ${val[0]}"
+            echo -e "${RED}-------- You entered wrong uniqueness constraint for ${val[0]} ${RESET}"
             exit 1
         fi
 
@@ -156,7 +156,7 @@ parse_colns () {
         elif [[ "${val[2]}" == "notnull" ]]; then 
                 val[2]=0
         else 
-            echo "-------- You entered wrong nullability constraint for ${val[0]}"
+            echo -e "${RED}-------- You entered wrong nullability constraint for ${val[0]} ${RESET}"
             exit 1
         fi
 
@@ -165,7 +165,7 @@ parse_colns () {
         elif [[ "${val[3]}" == "integer" ]]; then 
                 val[3]="i"
         else 
-            echo "-------- You entered wrong type for ${val[0]}"
+            echo -e "${RED}-------- You entered wrong type for ${val[0]} ${RESET}"
             exit 1
         fi
         ## parse the column and write it in metadata
@@ -218,11 +218,11 @@ parse_colns "$@"
 # printing if code success 
     ## making the append in pk file
     PK_file_make "$@"
-    echo "=======> PK File updated successfully."
+    echo -e "${GREEN}=======> PK File updated successfully. ${RESET}"
     ##creating meta data and writing buffered data in meta data file
     touch "../Databases/$1/.${2}_meta"
     printf "%s\n" "${buffer[@]}" > "../Databases/$1/.${2}_meta"
-    echo "=======> Meta Data File created successfully."
+    echo -e "${GREEN}=======> Meta Data File created successfully. ${RESET}"
 }
 
 main "$@"

@@ -23,7 +23,7 @@ main(){
     no_cols_validation $col_names
 
         echo "====================================="
-        echo "Enter column name, followed by the value you want to insert"
+        echo -e "${BLUE}Enter column name, followed by the value you want to insert ${RESET}"
 
         # A string that stores the 
         # input columns that exist in the table meta data (column names => first line )
@@ -55,7 +55,7 @@ main(){
             then
             update_multiple_rows
             else 
-                echo "The datatype of this table is string, cannot perform this operation"
+                echo -e "${RED}The datatype of this table is string, cannot perform this operation ${RESET}"
             fi
             break
             ;;
@@ -74,12 +74,12 @@ table_name_validation(){
         res=$?
         if [ $res -eq 1 ]
         then 
-        echo "Enter a value, the system doesn't accept empty inputs"
+        echo -e "${RED}Enter a value, the system doesn't accept empty inputs ${RESET}"
         else
         check_if_exists f "$DB_Path/$table_name"
             if [ $? -eq 0 ]
             then
-            echo "This table doesn't exist"
+            echo -e "${RED}This table doesn't exist ${RESET}"
             else break 
             fi
         fi
@@ -97,10 +97,10 @@ no_cols_validation(){
         read -p "Enter number of columns you want to update : " no_cols
         is_empty $no_cols
         if [ $? -eq 1 ]
-        then echo "System does not accept empty inputs"
+        then echo -e "${RED}System does not accept empty inputs ${RESET}"
         else
             if [[ ( $no_cols > ${#col_names_arr[@]} ) || ( $no_cols -lt 1 ) ]]
-            then echo "Invalid number of columns"
+            then echo -e "${RED}Invalid number of columns ${RESET}"
             else break 
             fi
 	    fi
@@ -113,16 +113,16 @@ input_cols_validation(){
                 read -p "Column $i : " input_col
                 is_empty $input_col
                 if [ $? -eq 1 ]
-                then echo "Error: empty input"
+                then echo -e "${RED}Error: empty input ${RESET}"
                 else 
                     col_names_validation $input_col $col_names
                     res=$?
                     if [ $res -eq 0 ]
                     then 
-                        echo "Column name you entered does not exist in the table, enter another name :  "
+                        echo -e "${RED}Column name you entered does not exist in the table ${RESET}, enter another name :  "
                     elif [ $res -eq 2 ]
                     then 
-                        echo "You entered this name before, enter another column name "
+                        echo -e "${RED}You entered this name before${RESET}, enter another column name "
                     else 
                         input_cols_arr[$((i-1))]=$input_col
                         break
@@ -176,7 +176,7 @@ input_vals_validation(){
         is_empty $input_val
         if [ $? -eq 1 ]
         then
-            echo "System does not accept empty inputs"
+            echo -e "${RED}System does not accept empty inputs ${RESET}"
         else
             constraints_check $input_val "${input_cols_arr[$((i-1))]}" $DB_Name $table_name
             if [ $? -eq 0 ]  # There are no errors
@@ -203,7 +203,7 @@ update_by_id(){
             # This value needs to be validated => integer or string
             is_empty $PK_Val
             if [ $? -eq 1 ]
-            then echo "System does not accept empty input"
+            then echo -e "${RED}System does not accept empty input ${RESET}"
             else break
             fi
         done
@@ -233,7 +233,7 @@ update_by_id(){
        IFS=: read -r -a meta_data_arr <<< $meta_data
        if [[ "${meta_data_arr[1]}" == "1" ]]
        then 
-            echo "It is not allowed to update multiple values in unique columns"
+            echo -e "${RED}It is not allowed to update multiple values in unique columns ${RESET}"
             return
         fi
     done
@@ -269,7 +269,7 @@ update_multiple_rows(){
     is_empty $min
     if [ $? -eq 1 ]
     then 
-        echo "System doesn't accept empty values"
+        echo -e "${RED}System doesn't accept empty values${RESET}"
     else
             min_datatype=""
             if [[ $min =~ ^-?[0-9]+$ ]]
@@ -282,7 +282,7 @@ update_multiple_rows(){
             if [[ $min_datatype == "i" ]]
             then break
             else 
-                echo "Minimum value has to be integer"
+                echo -e "${RED}Minimum value has to be integer${RESET}"
             fi
     fi 
     done
@@ -294,7 +294,7 @@ update_multiple_rows(){
         is_empty $max
         if [ $? -eq 1 ]
         then 
-            echo "System doesn't accept empty values"
+            echo -e "${RED}System doesn't accept empty values${RESET}"
         else
             max_datatype=""
             if [[ $max =~ ^-?[0-9]+$ ]]
@@ -307,7 +307,7 @@ update_multiple_rows(){
             if [[ $max_datatype == "i" ]]
             then break
             else 
-                echo "Minimum value has to be integer"
+                echo -e "${RED}Minimum value has to be integer${RESET}"
             fi
         fi
     done

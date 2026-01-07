@@ -16,7 +16,7 @@ then
 			DB_Path="../Databases/$DB_Name"
 			break
 		else 
-			echo "System doesn't accept empty inputs"
+			echo "${RED}System doesn't accept empty inputs ${RESET}"
 		fi 
 	done
 
@@ -35,7 +35,11 @@ do
 		# While loop for the select to display the menu after choosing any option
 		while true
 		do
-			 echo "====================================="
+			sleep 0.7
+			clear
+			echo -e "${CYAN}=====================================${RESET}"
+			echo -e "${GREEN}            Tables Menu                ${RESET}"
+			echo -e "${CYAN}=====================================${RESET}"
 			 PS3="Enter a number : "
 			select choice in "Create Table" "List Tables" "Drop Table" "Insert into Table" "Select from Table" "Delete From Table" "Update Table" "Exit" 
 			do
@@ -46,7 +50,7 @@ do
 				 read -p "Enter table name : " table_name
 				 is_empty $table_name
 				 if [ $? -eq 1 ]
-				 then echo "System doesn't accept empty inputs"
+				 then echo -e "${RED}System doesn't accept empty inputs${RESET}"
 				 else break
 				 fi
 				 done
@@ -60,7 +64,7 @@ do
 					read -p "Enter table name : " table_name
 					is_empty $table_name
 					if [ $? -eq 1 ]
-					then echo "Empty inputs are not allowed"
+					then echo -e "${RED}Empty inputs are not allowed${RESET}"
 					else break
 					fi 
 					done
@@ -77,13 +81,13 @@ do
 					break;;
 				8) source main.sh
 				;;
-				*) echo "Invalid option"
+				*) echo -e "${RED}Invalid option${RESET}"
 					break;;
 				esac
 			done
 		done
 		else
-			echo "Database name you entered is not found"
+			echo -e "${RED}Database name you entered is not found ${RESET}"
 			echo "====================================="
 			select choice in "Enter another name" "Exit from this menu"
 			do 
