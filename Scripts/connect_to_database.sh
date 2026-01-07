@@ -1,12 +1,20 @@
 #!/usr/bin/bash
+
 declare -a buffer
 source repeating_functions.sh
 
+# --- Get database name ---
 if [ $# -eq 0 ]; then
     while true; do
         DB_Name=$(zenity --entry --title="Connect to Database" --text="Enter the database name:")
-        is_empty $DB_Name
-        if [ $? -eq 0 ]; then
+        ret=$?
+        if [ $ret -ne 0 ]; then
+            exit 0
+        fi
+
+        is_empty "$DB_Name"
+        ret=$?
+        if [ $ret -eq 0 ]; then
             DB_Path="../Databases/$DB_Name"
             break
         else
@@ -18,8 +26,9 @@ elif [ $# -eq 1 ]; then
     DB_Path="../Databases/$DB_Name"
 fi
 
+# --- Main menu loop ---
 while true; do
-    check_if_exists d $DB_Path
+    check_if_exists d "$DB_Path"
     if [ $? -eq 1 ]; then
         while true; do
             choice=$(zenity --list --title="Database: $DB_Name" \
@@ -33,21 +42,29 @@ while true; do
                 "Update Table" \
                 "Exit")
 
-            case $choice in
+            # Exit if user cancels the menu
+            if [ $? -ne 0 ]; then
+                exit 0
+            fi
+
+            case "$choice" in
                 "Create Table")
                     table_name=$(zenity --entry --title="Create Table" --text="Enter table name:")
-                    if [ -n "$table_name" ]; then
+                    if [ $? -eq 0 ] && [ -n "$table_name" ]; then
                         ./create_table.sh "$DB_Name" "$table_name"
                         zenity --info --text="Table '$table_name' created successfully!"
                     fi
                     ;;
                 "List Tables")
-                    tables=$(ls $DB_Path | tr '\n' ' ')
+                    tables=$(ls "$DB_Path" 2>/dev/null | tr '\n' ' ')
+                    if [ -z "$tables" ]; then
+                        tables="No tables found."
+                    fi
                     zenity --info --title="Tables in $DB_Name" --text="$tables"
                     ;;
                 "Drop Table")
                     table_name=$(zenity --entry --title="Drop Table" --text="Enter table name to drop:")
-                    if [ -n "$table_name" ]; then
+                    if [ $? -eq 0 ] && [ -n "$table_name" ]; then
                         ./drop_table.sh "$DB_Name" "$table_name"
                         zenity --info --text="Table '$table_name' dropped!"
                     fi
@@ -56,7 +73,7 @@ while true; do
                     ./insert_into_table.sh "$DB_Name"
                     ;;
                 "Select from Table")
-                    ./enhanced_select_from_table.sh "$DB_Name"
+                    ./select_from_table.sh "$DB_Name"
                     ;;
                 "Delete From Table")
                     ./delete_from_table.sh "$DB_Name"
@@ -75,8 +92,13 @@ while true; do
     else
         retry=$(zenity --list --title="Database Not Found" \
             --column="Option" "Enter another name" "Exit")
-        case $retry in
+        if [ $? -ne 0 ]; then
+            exit 0
+        fi
+
+        case "$retry" in
             "Enter another name")
+                break
                 ;;
             "Exit")
                 exit 0
